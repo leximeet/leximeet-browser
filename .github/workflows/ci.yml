@@ -64,6 +64,8 @@ jobs:
             .output/leximeet-browser-*-edge.zip
             .output/store-packages.json
             .output/SHA256SUMS
+          # .output 是隐藏目录；仅放行上述经过校验的四个文件，不上传整个目录。
+          include-hidden-files: true
           if-no-files-found: error
           compression-level: 0
           retention-days: 14
