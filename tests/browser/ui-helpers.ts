@@ -26,15 +26,9 @@ export async function addWord(page: Page, word: string) {
 }
 export async function setTarget(page: Page, count = 12) {
   await navigate(page, "学习规划");
-  const initial = page.getByRole("button", {
-    name: "设置学习规划",
-    exact: true,
-  });
-  await (
-    (await initial.count())
-      ? initial
-      : page.getByRole("button", { name: "更换学习目标", exact: true })
-  ).click();
+  // 新管理页先加载资料；即时 count=0 不代表已有目标。等待任一真实入口，
+  // 避免把加载中的空 DOM 误判成“更换目标”，又不替测试创建计划或延长超时。
+  await page.getByRole("button", { name: /^(设置学习规划|更换学习目标)$/ }).click();
   const dialog = page.getByRole("dialog");
   await dialog.getByRole("button", { name: "四级词汇", exact: false }).first().click();
   await dialog.getByRole("button", { name: "下一步：每天学多少", exact: false }).click();

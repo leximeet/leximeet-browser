@@ -1991,18 +1991,14 @@ export default defineBackground(() => {
     if (alarm.name === "leximeet-desktop-discovery")
       void discovery.poll().catch(() => {});
   });
-  // 每次 Worker 启动重建 alarm；无通道时靠 30 秒 alarm，活跃通道控制轮询限为 5 秒。
+  // 每次 Worker 启动重建 alarm；独立且未发现桌面时靠 30 秒 alarm。
+  // 桌面归属的控制检测保持 5 秒，关闭端口后仍查证明确断开，不凭失联恢复 A。
   void browser.alarms.create("leximeet-desktop-discovery", {
     periodInMinutes: 0.5,
   });
   queueMicrotask(() => void discovery.start().catch(() => {}));
   setInterval(() => {
-    void discovery
-      .view()
-      .then((view) => {
-        if (view.available) return discovery.poll();
-      })
-      .catch(() => {});
+    void discovery.pollWhenActive().catch(() => {});
   }, 5000);
   browser.runtime.onMessage.addListener((message: any, sender: any, sendResponse) => {
     if (message?.channel !== "leximeet") return;

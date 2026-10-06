@@ -223,6 +223,67 @@ test("业务端口仅替换发现而未明确断开，重握手保持 Desktop �
   }
 });
 
+test("桌面关闭端口后控制探测失败，下一次活跃检测仍查证断开并恢复 A", async () => {
+  const s = setup();
+  try {
+    await s.discovery.poll();
+    s.setState("disconnected");
+    s.close();
+    s.blockHost(true);
+    await s.discovery.pollWhenActive();
+    assert.equal((await s.discovery.view()).available, false);
+    assert.equal(s.ended(), 0);
+    assert.equal((await s.discovery.view()).connection.mode, "desktop");
+    s.blockHost(false);
+    const before = s.attempts();
+    await s.discovery.pollWhenActive();
+    assert.equal(s.attempts(), before + 1);
+    assert.equal(s.ended(), 1);
+    assert.equal((await s.discovery.view()).connection.mode, "independent");
+    assert.ok(
+      s.frames.every((frame) => ["hello", "getConnectionStatus"].includes(frame.method)),
+    );
+  } finally {
+    s.close();
+  }
+});
+
+test("活跃检测恢复临时失联仍保持 Desktop 归属，不把端口关闭当作明确断开", async () => {
+  const s = setup();
+  try {
+    await s.discovery.poll();
+    s.close();
+    s.blockHost(true);
+    await s.discovery.pollWhenActive();
+    s.blockHost(false);
+    await s.discovery.pollWhenActive();
+    assert.equal((await s.discovery.view()).available, true);
+    assert.equal((await s.discovery.view()).connection.mode, "desktop");
+    assert.equal(s.ended(), 0);
+  } finally {
+    s.close();
+  }
+});
+
+test("独立使用且桌面不可用时活跃检测不启动宿主，发现仍由正常 alarm 执行", async () => {
+  const s = setup({ independent: true });
+  try {
+    s.blockHost(true);
+    await s.discovery.poll();
+    const before = s.attempts();
+    await s.discovery.pollWhenActive();
+    await s.discovery.pollWhenActive();
+    assert.equal(s.attempts(), before);
+    s.blockHost(false);
+    await s.discovery.poll();
+    assert.equal(s.attempts(), before + 1);
+    assert.equal((await s.discovery.view()).available, true);
+    assert.equal(s.notifications(), 1);
+  } finally {
+    s.close();
+  }
+});
+
 test("重复 STALE 最多重握手一次，不循环重试、不解除 A 封存", async () => {
   const s = setup();
   try {

@@ -192,6 +192,14 @@ export class DesktopDiscovery {
       this.polling = undefined;
     }
   }
+  /** 活跃连接使用五秒控制检测。Desktop 主动断开会同时关闭原生端口，
+   * 此时 available=false 只说明通道失效，不能停止查证已保存的断开状态。
+   * 未连接且未发现 Desktop 时仍交给原三十秒 alarm，避免不断启动宿主。 */
+  async pollWhenActive(): Promise<void> {
+    await this.ready();
+    if (this.status || (await this.ports.connection()).mode === "desktop")
+      await this.poll();
+  }
   /** Worker 初始化可能早于宿主来源登记；仅首次传输未就绪补探测一次。
    * 两次都失败后继续由原30秒alarm检测，不拉起 Desktop、不请求邀请或恢复本地写入。 */
   start(): Promise<void> {
