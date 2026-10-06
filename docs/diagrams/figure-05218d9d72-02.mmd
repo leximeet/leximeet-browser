@@ -1,0 +1,7 @@
+erDiagram
+  WORD ||--o{ ENCOUNTER : 真实语境
+  WORD ||--o{ PRACTICE : 练习事件
+  WORD ||--o{ REVIEW : 回忆排程
+  WORD }o--o{ NOTEBOOK : 分组
+  PRACTICE ||--o| REVIEW : 来源提交
+  META ||--o| STUDY_PLAN : 当前规划

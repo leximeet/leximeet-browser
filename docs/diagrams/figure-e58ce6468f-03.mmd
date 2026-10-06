@@ -1,0 +1,6 @@
+flowchart LR
+  Pick[圈定真实单词位置] --> Sentence[提取所在句子]
+  Sentence --> Safe[脱敏并限制长度]
+  Safe --> Duplicate(七天内同词同语境?):::decision
+  Duplicate -->|是| Existing[返回已有遇见]
+  Duplicate -->|否| New[保存新遇见]

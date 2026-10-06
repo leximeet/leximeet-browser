@@ -1,0 +1,526 @@
+/* 一个范围共享词序；每种方式独立保留进度，底部空白仍属于练习区。 */
+.lm-workspace .v3-practice {
+  min-height: calc(100vh - 230px);
+}
+.lm-workspace .v3-practice-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--line);
+}
+.lm-workspace .v3-practice-toolbar .v3-tabs {
+  flex-basis: auto;
+  border: 0;
+  gap: 4px;
+  min-height: 36px;
+}
+.lm-workspace .v3-practice-toolbar .v3-tabs button {
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 5px;
+}
+.lm-workspace .v3-practice-toolbar .v3-tabs button[aria-pressed="true"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.lm-workspace .v3-practice-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+.lm-workspace .v3-practice-restart {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.lm-workspace .v3-practice-controls > label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.lm-workspace .v3-practice-toolbar select {
+  width: 176px;
+  height: 38px;
+}
+.lm-workspace .v3-practice-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 720px;
+  min-height: 0;
+  margin: 28px auto 0;
+  padding: 0 0 24px;
+  gap: 18px;
+  text-align: center;
+}
+.lm-workspace .v3-progress-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.lm-workspace .v3-progress-line button {
+  min-height: 32px;
+  color: var(--accent);
+}
+.lm-workspace .v3-practice-word-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.lm-workspace .v3-practice-word-line button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+}
+.lm-workspace .v3-practice-word-line button:hover {
+  background: var(--accent-soft);
+}
+.lm-workspace .v3-practice-headword {
+  margin: 0;
+  font: 46px/1.35 var(--reading-font);
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.lm-workspace .v3-meaning-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
+  gap: 12px;
+  margin: 10px 0 0;
+}
+.lm-workspace .v3-meaning-choices > button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  min-height: 76px;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  line-height: 1.7;
+  /* 作答只改变固定选项的状态；禁用时不淡出，hover 到反馈也不做颜色过渡。 */
+  transition: none;
+}
+.lm-workspace .v3-meaning-choices > button > span {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  background: var(--subtle);
+  color: var(--muted);
+  font-size: 12px;
+}
+.lm-workspace .v3-meaning-choices > button > .v3-choice-result {
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  color: inherit;
+  visibility: hidden;
+}
+.lm-workspace .v3-meaning-choices > button > .v3-choice-result.visible {
+  visibility: visible;
+}
+.lm-workspace .v3-meaning-choices strong {
+  flex: 1;
+  min-width: 0;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.lm-workspace .v3-meaning-choices > button:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.lm-workspace .v3-meaning-choices > button:disabled {
+  opacity: 1;
+  cursor: default;
+}
+.lm-workspace .v3-meaning-choices > button.correct {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.lm-workspace .v3-meaning-choices > button.wrong {
+  background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.lm-workspace .v3-practice-bottom {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+  margin-top: 6px;
+}
+.lm-workspace .v3-practice-meaning {
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.8;
+}
+.lm-workspace .v3-practice-sentence {
+  margin: 0;
+  font: 20px/1.8 var(--reading-font);
+  color: var(--muted);
+}
+.lm-workspace .v3-practice-feedback {
+  min-height: 24px;
+  margin: 0;
+  color: var(--accent);
+}
+.lm-workspace .v3-character-stage {
+  width: 100%;
+  padding: 20px 0;
+}
+
+@media (max-width: 1100px) {
+  .lm-workspace .v3-practice-toolbar .v3-tabs {
+    flex-basis: 100%;
+  }
+  .lm-workspace .v3-practice-controls {
+    margin-inline-start: 0;
+  }
+}
+@media (max-width: 650px) {
+  .lm-workspace .v3-practice-toolbar .v3-tabs button {
+    flex: 1;
+    padding-inline: 8px;
+  }
+  .lm-workspace .v3-practice-stage {
+    margin-top: 20px;
+  }
+  .lm-workspace .v3-practice-headword {
+    font-size: 38px;
+  }
+  .lm-workspace .v3-meaning-choices {
+    grid-template-columns: 1fr;
+    margin-top: 0;
+    gap: 8px;
+  }
+  .lm-workspace .v3-meaning-choices > button {
+    min-height: 62px;
+    padding: 12px;
+  }
+}
+
+.v3-character-stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  padding: 25px 0;
+  cursor: text;
+}
+.v3-character {
+  font: 48px/1.3 var(--reading-font);
+  color: var(--muted);
+  min-width: 26px;
+  border-bottom: 2px solid transparent;
+}
+.v3-character.current {
+  border-bottom-color: var(--accent);
+}
+.v3-character.typed {
+  color: var(--accent);
+}
+.v3-character-stage.error .v3-character {
+  color: var(--danger);
+}
+.v3-character-stage.success .v3-character {
+  color: var(--accent);
+}
+.v3-character-input {
+  position: absolute;
+  width: 1px !important;
+  height: 1px;
+  opacity: 0.01;
+  padding: 0 !important;
+  bottom: 0;
+  left: 50%;
+  border: 0 !important;
+}
+.v3-character-stage:focus-within {
+  outline: 1px solid var(--line);
+  outline-offset: 6px;
+  border-radius: 7px;
+}
+
+.lm-workspace .v3-practice progress {
+  width: 100%;
+  height: 4px;
+  border: 0;
+  accent-color: var(--accent);
+}
+.lm-workspace .v3-practice progress::-webkit-progress-bar {
+  background: var(--line);
+  border-radius: 4px;
+}
+.lm-workspace .v3-practice progress::-webkit-progress-value {
+  background: var(--accent);
+  border-radius: 4px;
+}
+@media (max-width: 650px) {
+  .lm-workspace .v3-character {
+    font-size: 40px;
+    min-width: 20px;
+  }
+}
+
+/* 六种方式换行展示，保留足够触控空间；范围控件与模式区各自成组。 */
+.lm-workspace .v3-practice-toolbar .v3-tabs {
+  flex-wrap: wrap;
+}
+.lm-workspace .v3-practice-stage.list-mode {
+  max-width: 100%;
+  align-items: stretch;
+  text-align: left;
+}
+.v3-practice-list {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.v3-practice-list-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--subtle);
+}
+.v3-practice-list-labels,
+.v3-practice-list-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.8fr) minmax(160px, 1.5fr) minmax(164px, 0.75fr);
+  gap: 16px;
+  align-items: center;
+  padding: 12px 16px;
+}
+.v3-practice-list-labels {
+  color: var(--muted);
+  font-size: 11px;
+  border-block: 1px solid var(--line);
+}
+.v3-practice-list-row {
+  min-height: 68px;
+  border-bottom: 1px solid var(--line);
+}
+.v3-practice-list-row.selected {
+  background: var(--accent-soft);
+  box-shadow: inset 2px 0 var(--accent);
+}
+.v3-practice-list-word > button:not(.v3-word-mask) {
+  font: 24px/1.4 var(--reading-font);
+  overflow-wrap: anywhere;
+  text-align: left;
+  padding: 0;
+}
+.v3-practice-list-word {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+}
+.v3-practice-word-score {
+  font: 11px/1.5 var(--ui-font);
+  color: var(--muted);
+}
+.v3-practice-list-meaning {
+  font-size: 13px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.v3-word-mask {
+  border: 1px dashed var(--line);
+  border-radius: 5px;
+  min-height: 34px;
+  padding: 6px 14px;
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--subtle);
+}
+.v3-word-mask:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.v3-practice-list-signals {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.v3-practice-list-signals .v3-secondary {
+  padding: 7px 12px;
+}
+.v3-list-feedback {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--accent);
+}
+.v3-written-practice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 24px;
+}
+.lm-workspace .v3-listening-play {
+  font-size: 16px;
+  min-height: 56px;
+  padding: 14px 24px;
+}
+.v3-listening-play[aria-busy="true"] .icon {
+  animation: listening-cue 1s ease-in-out infinite;
+}
+@keyframes listening-cue {
+  50% {
+    opacity: 0.35;
+  }
+}
+.v3-cloze-question {
+  font: 24px/1.8 var(--reading-font);
+  margin: 8px 0;
+  overflow-wrap: anywhere;
+}
+.v3-written-form {
+  display: flex;
+  width: 100%;
+  max-width: 560px;
+  gap: 12px;
+}
+.v3-written-form input {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-size: 20px;
+  height: 50px;
+}
+.v3-written-form button {
+  flex: none;
+}
+.v3-written-form input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+.v3-written-hint {
+  font: 24px/1.5 var(--reading-font);
+  margin: 0;
+  color: var(--accent);
+}
+@media (max-width: 650px) {
+  .lm-workspace .v3-practice-toolbar .v3-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+  }
+  .lm-workspace .v3-practice-toolbar .v3-tabs button {
+    padding-inline: 6px;
+  }
+  .lm-workspace .v3-practice-controls {
+    width: 100%;
+  }
+  .lm-workspace .v3-practice-controls > label {
+    flex: 1 1 calc(100% - 104px);
+    min-width: 0;
+  }
+  .lm-workspace .v3-practice-controls select {
+    flex: 1;
+    width: 0;
+    min-width: 0;
+    max-width: 176px;
+  }
+  .v3-practice-list-labels {
+    display: none;
+  }
+  .v3-practice-list-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 12px;
+    padding: 12px;
+  }
+  .v3-practice-list-word {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .v3-practice-list-signals {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    flex-direction: column;
+  }
+  .v3-practice-list-meaning {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .v3-practice-list-heading {
+    padding: 12px;
+    align-items: flex-start;
+  }
+  .v3-practice-list-heading > span {
+    font-size: 11px;
+  }
+  .v3-written-form {
+    flex-direction: column;
+  }
+  .v3-cloze-question {
+    font-size: 21px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v3-listening-play[aria-busy="true"] .icon {
+    animation: none;
+  }
+}
+
+.v3-practice-list .v3-pagination {
+  flex-wrap: wrap;
+}
+
+/* 保存只锁操作，不让整排模式/范围按钮闪淡；下题就绪前保持旧卡片与原位置。 */
+.lm-workspace .v3-practice button:disabled {
+  opacity: 1;
+}
+.lm-workspace .v3-meaning-choices > button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* 当前题序与已完成量分开显示；补练沿用原题，避免把跳过误认为完成。 */
+.lm-workspace .v3-practice-completion {
+  margin-left: 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.lm-workspace .v3-practice-remaining {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0;
+  font-size: 12px;
+  color: var(--muted);
+}

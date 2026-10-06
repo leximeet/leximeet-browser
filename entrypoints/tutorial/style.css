@@ -1,0 +1,137 @@
+:root {
+  color-scheme: light;
+  --paper: #fffefb;
+  --ink: #253c30;
+  --muted: #708375;
+  --rule: #dce5dd;
+  --canvas: #f1f4ee;
+  --accent: #167257;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #1e2a23;
+  --ink: #e4ede6;
+  --muted: #a0b3a4;
+  --rule: #38483c;
+  --canvas: #162019;
+  --accent: #9bcbb1;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+}
+.lesson-header {
+  height: 76px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 40px;
+  border-bottom: 1px solid var(--rule);
+  font: 12px/1.4 system-ui;
+}
+.lesson-header img {
+  width: 108px;
+  height: auto;
+}
+.lesson-header span {
+  color: var(--muted);
+}
+.lesson-header button {
+  margin-left: auto;
+  padding: 8px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.lesson {
+  max-width: 1020px;
+  margin: 34px auto;
+  padding: 48px 76px 30px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+}
+.lesson-caption {
+  color: var(--accent);
+  font: 600 10px/1.5 system-ui;
+  letter-spacing: 0.16em;
+}
+.lesson h1 {
+  font:
+    500 clamp(38px, 5vw, 64px) / 1.05 Georgia,
+    serif;
+  letter-spacing: -0.035em;
+  margin: 28px 0 22px;
+}
+.lesson-lead {
+  color: var(--muted);
+  font:
+    20px/1.5 Georgia,
+    serif;
+  max-width: 620px;
+}
+.lesson-divider {
+  margin: 34px 0;
+  border-top: 1px solid var(--rule);
+}
+.lesson article > p:not(.lesson-lead) {
+  font:
+    21px/1.85 Georgia,
+    serif;
+  margin: 24px 0;
+}
+.lesson h2 {
+  font:
+    26px/1.4 Georgia,
+    serif;
+  margin-top: 38px;
+}
+.lesson blockquote {
+  margin: 35px 0;
+  padding: 25px 0;
+  text-align: center;
+  font:
+    italic 26px/1.5 Georgia,
+    serif;
+  color: var(--accent);
+  border-block: 1px solid var(--rule);
+}
+.lesson-footer {
+  border-top: 1px solid var(--rule);
+  margin-top: 36px;
+  padding-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 14px;
+  color: var(--muted);
+  font: 11px/1.5 system-ui;
+}
+@media (max-width: 900px) {
+  .lesson {
+    margin: 20px;
+    padding: 38px;
+  }
+  .lesson-header {
+    padding: 0 24px;
+  }
+}
+@media (max-width: 500px) {
+  .lesson {
+    margin: 12px;
+    padding: 28px 22px;
+  }
+  .lesson-header {
+    gap: 10px;
+    padding: 0 16px;
+  }
+  .lesson article > p:not(.lesson-lead) {
+    font-size: 19px;
+  }
+}

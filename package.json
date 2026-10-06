@@ -1,0 +1,56 @@
+{
+  "name": "leximeet-browser",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "description": "词遇浏览器插件：独立学习或连接桌面端遇见与采集",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "wxt",
+    "prepare:dictionary": "node scripts/prepare-dictionary.mjs",
+    "predev": "npm run prepare:dictionary && npm run prepare:connector",
+    "prebuild": "npm run prepare:dictionary && npm run prepare:connector",
+    "build": "wxt build --mv3",
+    "prezip": "npm run prepare:dictionary && npm run prepare:connector",
+    "zip": "wxt zip --mv3",
+    "prelab:browser": "npm run build && npm run verify:manifest",
+    "lab:browser": "node scripts/launch-isolated-browser.mjs",
+    "pretypecheck": "npm run prepare:dictionary && wxt prepare",
+    "typecheck": "vue-tsc --noEmit",
+    "postinstall": "wxt prepare",
+    "pretest": "npm run prepare:dictionary",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "test:browser": "playwright test",
+    "test:browser:visible": "playwright test --headed",
+    "verify:manifest": "node scripts/verify-built-manifest.cjs",
+    "verify": "npm run format:check && npm run docs:check && npm run verify:connector && npm run typecheck && npm test && npm run build && npm run verify:manifest && npm run test:browser",
+    "fetch:dictionary": "node scripts/fetch-dictionary.mjs",
+    "lab:connected": "node scripts/launch-connected-lab.mjs",
+    "test:connected": "playwright test --config playwright.connected.config.ts",
+    "prepare:connector": "node scripts/prepare-connector.mjs",
+    "verify:connector": "node scripts/verify-connector.mjs",
+    "test:upgrade": "playwright test --config playwright.upgrade.config.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "docs:check": "node scripts/check-docs.mjs"
+  },
+  "dependencies": {
+    "fzstd": "0.1.1",
+    "vue": "3.5.42"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "25.5.0",
+    "@wxt-dev/module-vue": "1.0.3",
+    "fake-indexeddb": "6.2.5",
+    "playwright": "1.63.0",
+    "prettier": "3.6.2",
+    "typescript": "5.9.3",
+    "vite": "8.3.0",
+    "vue-tsc": "3.2.5",
+    "wxt": "0.21.4"
+  }
+}

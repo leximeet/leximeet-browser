@@ -1,0 +1,6 @@
+flowchart LR
+  A[独立资料 A] -->|确认连接| Seal[A 封存停写]
+  Seal --> B[使用 Desktop B]
+  C[网页采集 C] --> B
+  Seal -->|明确断开| A
+  B --> Keep[Desktop 保留 B+C]

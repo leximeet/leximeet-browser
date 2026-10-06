@@ -1,0 +1,9 @@
+flowchart LR
+  Word[选中真实词位] --> Sentence[该词所在单句]
+  Sentence --> Safe[限长与默认脱敏]
+  Safe --> Check[检查词范围和当前归属]
+  Check --> Save[提交原操作身份]
+  Save --> Result(权威回执):::decision
+  Result -->|新保存| Added[更新个人词与遇见]
+  Result -->|七天重复| Existing[复用已有遇见]
+  Result -->|失败或未知| Retry[保留草稿并沿原 ID 重试]

@@ -1,0 +1,10 @@
+flowchart LR
+  Install[安装并进入教学] --> Choice(使用方式):::decision
+  Choice -->|先记录| Capture[采集和整理单词]
+  Choice -->|设置规划| Goal[选择学习目标]
+  Goal --> Plan[设置每日配额]
+  Plan --> Today[今日学习]
+  Capture --> Library[我的词库]
+  Library --> Practice[自由练习]
+  Today --> Practice
+  Practice --> State[自动更新状态与到期]

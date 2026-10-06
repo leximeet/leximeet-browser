@@ -1,0 +1,19 @@
+# 构建、依赖、个人测试数据和原始报告
+node_modules/
+.wxt/
+.output/
+test-results/
+playwright-report/
+.dictionary-release/
+public/
+# 固定来源的协议规范、Golden向量与资产锁保留原字节
+lib/connector/contracts/
+tests/fixtures/
+dictionary-text.lock.json
+THIRD_PARTY_LICENSES/
+docs/assets/
+# 上游许可与来源锁保持逐字节原文
+docs/dictionary-notices/
+
+# 图表为带哈希的生成物，不能二次格式化。
+docs/diagrams/rendered/

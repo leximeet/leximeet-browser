@@ -1,0 +1,9 @@
+flowchart LR
+  Gesture[点词或拖拽] --> Range[绑定真实 Range 和文档]
+  Range --> Draft[单句与批注草稿]
+  Draft --> Owner(后台确认归属):::decision
+  Owner -->|独立| Local[安全化与去重事务]
+  Owner -->|连接| Desktop[原 WordRef 与原操作 ID]
+  Local --> Receipt[真实保存或重复回执]
+  Desktop --> Receipt
+  Receipt --> View[更新词卡与遇见状态]

@@ -1,0 +1,312 @@
+/* 管理页独占标签内容区；进入前台管理标签时由后台收起真实阅读侧栏。 */
+.app.v3-management .mg-window {
+  height: 100dvh;
+  min-height: 0;
+}
+.app.v3-management .mg-frame {
+  min-height: 0;
+  overflow: hidden;
+}
+.lm-workspace .mg-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.lm-workspace .mg-sidebar {
+  overflow-y: auto;
+}
+.lm-workspace .mg-page-head {
+  flex: none;
+  min-height: 96px;
+  padding: 28px 32px 20px;
+}
+.lm-workspace .mg-page-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 32px 28px;
+  scrollbar-gutter: stable;
+}
+.lm-workspace .v3-tabs {
+  gap: 24px;
+  min-height: 44px;
+}
+.lm-workspace .v3-tabs button {
+  min-height: 44px;
+  padding: 10px 2px;
+}
+.lm-workspace .v3-catalog > .v3-tabs {
+  margin-bottom: 22px;
+}
+.lm-workspace .v3-catalog-tools {
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.lm-workspace .v3-catalog-tools > input {
+  flex: 1;
+  min-width: 180px;
+  max-width: 350px;
+}
+/* 底色放在容器上，深色主题只反转 SVG，不会把底色变成实心色块。 */
+.lm-workspace .v3-catalog-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  background: var(--warm);
+  border-radius: 6px;
+}
+.lm-workspace .v3-catalog-icon > .icon {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  background: none;
+}
+.lm-workspace .mg-theme-card footer small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lm-workspace .v3-local-heading {
+  margin: 0 0 6px;
+  font-size: 19px;
+}
+.lm-workspace .v3-dictionary-row > div {
+  min-width: 0;
+}
+.lm-workspace .v3-dictionary-row + .v3-actions {
+  margin-top: 22px;
+}
+.lm-workspace .v3-date-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 16px 0;
+}
+.lm-workspace .v3-date-filters button {
+  min-height: 34px;
+  padding: 7px 10px;
+  border-radius: 5px;
+}
+.lm-workspace .v3-date-filters button[aria-pressed="true"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.lm-workspace .v3-encounters > .v3-actions {
+  flex-wrap: wrap;
+}
+.lm-workspace .v3-encounters input[type="date"] {
+  width: auto;
+  max-width: 100%;
+}
+.lm-workspace .v3-live-coach {
+  flex: none;
+}
+.lm-workspace .v3-icon-button {
+  min-width: 36px;
+  min-height: 36px;
+}
+.lm-workspace :is(.v3-primary, .v3-secondary, .mg-primary) {
+  align-items: center;
+  gap: 8px;
+}
+.lm-workspace .v3-dialog-body {
+  overflow-wrap: anywhere;
+}
+
+/* 导航按任务分组，标签只负责定位，不增加说明性文案。 */
+.lm-workspace .mg-sidebar > nav {
+  gap: 20px;
+}
+.lm-workspace .mg-navigation-group {
+  min-width: 0;
+}
+/* 在当前主题作用域解析颜色，避免原型的旧别名继承明亮色。 */
+.lm-workspace .mg-sidebar nav button:hover {
+  background: var(--hover);
+}
+.lm-workspace .mg-sidebar nav button.active {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+.lm-workspace .mg-navigation-label {
+  margin: 0 12px 8px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 400;
+}
+@media (max-width: 1100px) {
+  .lm-workspace .mg-page-head {
+    padding: 24px 24px 18px;
+  }
+  .lm-workspace .mg-page-body {
+    padding: 0 24px 24px;
+  }
+}
+@media (max-width: 650px) {
+  /* 窄窗两组各自横向排列，仍保留设置、回收站和单词本入口。 */
+  .app.v3-management .mg-window {
+    height: auto;
+    min-height: 100dvh;
+  }
+  .app.v3-management .mg-frame {
+    display: block;
+    overflow: visible;
+  }
+  .lm-workspace .mg-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 12px;
+    overflow: visible;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .lm-workspace .mg-brand,
+  .lm-workspace .mg-local-user {
+    display: none;
+  }
+  .lm-workspace .mg-sidebar > nav {
+    display: grid;
+    overflow: visible;
+    gap: 4px;
+  }
+  .lm-workspace .mg-navigation-group {
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    gap: 3px;
+  }
+  .lm-workspace .mg-navigation-label {
+    flex: none;
+    margin: 0 6px 0 0;
+    white-space: nowrap;
+  }
+  .lm-workspace .mg-sidebar > nav button {
+    flex: none;
+    width: auto;
+    min-height: 36px;
+    padding: 8px 10px;
+    white-space: nowrap;
+  }
+  .lm-workspace .mg-sidebar > nav :is(.icon, small) {
+    display: none;
+  }
+  .lm-workspace .v3-notebooks {
+    display: flex;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    gap: 10px;
+    margin: 0;
+    padding: 4px 0;
+    border-top: 0;
+  }
+  .lm-workspace .v3-notebook-head {
+    align-items: center;
+    flex: none;
+    padding: 0;
+  }
+  .lm-workspace .v3-notebook-item {
+    flex: none;
+  }
+  .lm-workspace .mg-sidebar-bottom {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .lm-workspace .mg-sidebar-bottom > button {
+    width: auto;
+    padding: 7px 9px;
+    min-height: 34px;
+  }
+  .lm-workspace .mg-main {
+    overflow: visible;
+  }
+  .lm-workspace .mg-page-head {
+    padding: 20px 16px;
+    min-height: 76px;
+  }
+  .lm-workspace .mg-page-body {
+    display: block;
+    overflow: visible;
+    padding: 0 16px 24px;
+  }
+  .lm-workspace .v3-catalog-tools {
+    flex-direction: row;
+  }
+  .lm-workspace .v3-catalog-tools > input {
+    flex-basis: 100%;
+    margin: 0;
+    max-width: none;
+  }
+  .lm-workspace .v3-dictionary-row {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .lm-workspace .v3-dictionary-row > div {
+    flex-basis: calc(100% - 42px);
+  }
+  .lm-workspace .v3-dictionary-row > button {
+    margin-left: 38px;
+  }
+  .lm-workspace .v3-setting-row select {
+    max-width: 100%;
+  }
+}
+
+/* 对话框的标题与关闭按钮固定，正文独立滚动；短操作无需再浏览目标列表。 */
+.lm-workspace .v3-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.lm-workspace .v3-dialog > header {
+  flex: none;
+}
+.lm-workspace .v3-dialog-body {
+  min-height: 0;
+  overflow-y: auto;
+}
+.lm-workspace .v3-plan-dialog-grid.adjusting {
+  grid-template-columns: 1fr;
+}
+.lm-workspace .v3-plan-dialog-grid .v3-tabs {
+  margin-bottom: 16px;
+}
+.lm-workspace .v3-plan-dialog-grid .v3-segmented {
+  margin-bottom: 12px;
+}
+.lm-workspace .v3-plan-dialog-grid h3:first-child {
+  margin-top: 0;
+}
+.lm-workspace .v3-plan-current-target {
+  padding: 12px 14px;
+  margin-bottom: 20px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 6px;
+}
+.lm-workspace .v3-switch {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: none;
+  width: 36px;
+  min-width: 36px;
+  padding: 3px;
+  overflow: hidden;
+}
+.lm-workspace .v3-switch > span {
+  margin: 0;
+  flex: none;
+}
+.lm-workspace .v3-catalog-icon > .icon {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+  flex: none;
+}

@@ -1,0 +1,9 @@
+flowchart TB
+  Page[当前网页与用户手势] --> Content[内容脚本与真实词位]
+  Content --> BG[后台验证来源和代次]
+  Panel[可信原生侧栏] --> BG
+  BG --> Owner(当前资料归属):::decision
+  Owner -->|独立| Local[本地仓库与词典]
+  Owner -->|连接| Remote[DesktopReading 适配]
+  Local --> IDB[(个人 IndexedDB)]
+  Remote --> Host[Native Host 与 Desktop]

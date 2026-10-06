@@ -1,0 +1,88 @@
+name: Browser real Desktop connection
+on:
+  workflow_dispatch:
+    inputs:
+      desktop_ref:
+        description: "leximeet-desktop实际提交SHA或已存在ref"
+        required: true
+        type: string
+      core_ref:
+        description: "leximeet-desktop-core实际提交SHA或已存在ref"
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  connected:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - name: 设置本轮临时公开词包和报告目录
+        run: |
+          printf 'LEXIMEET_DICTIONARY_RELEASE_DIR=%s/leximeet-dictionary-v0.0.3\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          printf 'LEXIMEET_TEST_OUTPUT=%s/browser-connected\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          path: workspace/plugin/leximeet-browser
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: leximeet/leximeet-desktop
+          ref: ${{ inputs.desktop_ref }}
+          path: workspace/leximeet-desktop
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: leximeet/leximeet-desktop-core
+          ref: ${{ inputs.core_ref }}
+          path: workspace/leximeet-desktop/core-java
+          persist-credentials: false
+      - name: 拒绝与Desktop固定gitlink不同的Core候选
+        run: |
+          expected_core="$(git -C workspace/leximeet-desktop rev-parse HEAD:core-java)"
+          actual_core="$(git -C workspace/leximeet-desktop/core-java rev-parse HEAD)"
+          if [ "$expected_core" != "$actual_core" ]; then
+            echo 'Core提交与Desktop固定gitlink不同，请选择同一冻结组合。' >&2
+            exit 1
+          fi
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: |
+            workspace/plugin/leximeet-browser/package-lock.json
+            workspace/leximeet-desktop/package-lock.json
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: 记录实际源码与工具版本
+        run: |
+          mkdir -p "$LEXIMEET_TEST_OUTPUT"
+          git -C workspace/plugin/leximeet-browser rev-parse HEAD > "$LEXIMEET_TEST_OUTPUT/browser-sha.txt"
+          git -C workspace/leximeet-desktop rev-parse HEAD > "$LEXIMEET_TEST_OUTPUT/desktop-sha.txt"
+          git -C workspace/leximeet-desktop/core-java rev-parse HEAD > "$LEXIMEET_TEST_OUTPUT/core-sha.txt"
+          node --version
+          java -version
+          mvn -version
+      - run: npm ci
+        working-directory: workspace/plugin/leximeet-browser
+      - run: npm ci
+        working-directory: workspace/leximeet-desktop
+      - run: npm run fetch:dictionary -- --with-core
+        working-directory: workspace/plugin/leximeet-browser
+      - run: npx playwright install chromium
+        working-directory: workspace/plugin/leximeet-browser
+      - run: npm run build && npm run verify:manifest
+        working-directory: workspace/plugin/leximeet-browser
+      - run: npm run build
+        working-directory: workspace/leximeet-desktop
+      # 调用已有driver，生产字节、真实SIDE_PANEL、焦点与清理断言不在YAML重写。
+      - run: npm run test:connected
+        working-directory: workspace/leximeet-desktop
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        if: always()
+        with:
+          name: browser-real-connected-macos-arm64
+          path: ${{ env.LEXIMEET_TEST_OUTPUT }}
+          retention-days: 14

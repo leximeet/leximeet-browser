@@ -1,0 +1,412 @@
+{
+  "formatVersion": 1,
+  "fingerprintAlgorithm": "sha256-utf8-canonical-json-v1",
+  "cases": [
+    {
+      "name": "astral_prefix_uses_utf16",
+      "target": {
+        "kind": "book",
+        "bookId": "22222222-2222-4222-8222-222222222222"
+      },
+      "item": {
+        "eventId": "11111111-1111-4111-8111-111111111111",
+        "surface": "book",
+        "originalSentence": "📚 Read this book, then book a room.",
+        "savedExcerpt": "Read this book.",
+        "occurrenceRanges": [
+          {
+            "start": 13,
+            "end": 17
+          }
+        ],
+        "excerptRanges": [
+          {
+            "start": 10,
+            "end": 14
+          }
+        ],
+        "annotation": {
+          "note": "保留原始时间和标点。"
+        },
+        "source": {
+          "type": "browser",
+          "title": "Example reading",
+          "url": "https://alice:secret@example.org:443/reading?token=private#book"
+        },
+        "occurredAt": "2026-09-15T09:30:00.000+08:00",
+        "timeZone": "Asia/Shanghai"
+      },
+      "expectedIssues": [],
+      "expectedFingerprint": "b27f88dbe063a42503a460366202ad04c7fc2d68df7b34fc03b1788ca0f566ea"
+    },
+    {
+      "name": "codepoint_index_is_invalid",
+      "target": {
+        "kind": "book",
+        "bookId": "22222222-2222-4222-8222-222222222222"
+      },
+      "item": {
+        "eventId": "11111111-1111-4111-8111-111111111111",
+        "surface": "book",
+        "originalSentence": "📚 Read this book, then book a room.",
+        "savedExcerpt": "Read this book.",
+        "occurrenceRanges": [
+          {
+            "start": 12,
+            "end": 16
+          }
+        ],
+        "excerptRanges": [
+          {
+            "start": 10,
+            "end": 14
+          }
+        ],
+        "annotation": {
+          "note": "保留原始时间和标点。"
+        },
+        "source": {
+          "type": "browser",
+          "title": "Example reading",
+          "url": "https://alice:secret@example.org:443/reading?token=private#book"
+        },
+        "occurredAt": "2026-09-15T09:30:00.000+08:00",
+        "timeZone": "Asia/Shanghai"
+      },
+      "expectedIssues": [
+        "OCCURRENCE_RANGE_INVALID"
+      ]
+    },
+    {
+      "name": "excerpt_range_is_independent",
+      "target": {
+        "kind": "book",
+        "bookId": "22222222-2222-4222-8222-222222222222"
+      },
+      "item": {
+        "eventId": "11111111-1111-4111-8111-111111111111",
+        "surface": "book",
+        "originalSentence": "📚 Read this book, then book a room.",
+        "savedExcerpt": "Read this book.",
+        "occurrenceRanges": [
+          {
+            "start": 13,
+            "end": 17
+          }
+        ],
+        "excerptRanges": [
+          {
+            "start": 13,
+            "end": 17
+          }
+        ],
+        "annotation": {
+          "note": "保留原始时间和标点。"
+        },
+        "source": {
+          "type": "browser",
+          "title": "Example reading",
+          "url": "https://alice:secret@example.org:443/reading?token=private#book"
+        },
+        "occurredAt": "2026-09-15T09:30:00.000+08:00",
+        "timeZone": "Asia/Shanghai"
+      },
+      "expectedIssues": [
+        "EXCERPT_RANGE_INVALID"
+      ]
+    },
+    {
+      "name": "empty_range_invalid",
+      "target": {
+        "kind": "book",
+        "bookId": "22222222-2222-4222-8222-222222222222"
+      },
+      "item": {
+        "eventId": "11111111-1111-4111-8111-111111111111",
+        "surface": "book",
+        "originalSentence": "📚 Read this book, then book a room.",
+        "savedExcerpt": "Read this book.",
+        "occurrenceRanges": [
+          {
+            "start": 13,
+            "end": 13
+          }
+        ],
+        "excerptRanges": [
+          {
+            "start": 10,
+            "end": 14
+          }
+        ],
+        "annotation": {
+          "note": "保留原始时间和标点。"
+        },
+        "source": {
+          "type": "browser",
+          "title": "Example reading",
+          "url": "https://alice:secret@example.org:443/reading?token=private#book"
+        },
+        "occurredAt": "2026-09-15T09:30:00.000+08:00",
+        "timeZone": "Asia/Shanghai"
+      },
+      "expectedIssues": [
+        "OCCURRENCE_RANGE_INVALID"
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "name": "event_id_does_not_change_content",
+      "target": {
+        "kind": "book",
+        "bookId": "22222222-2222-4222-8222-222222222222"
+      },
+      "item": {
+        "eventId": "33333333-3333-4333-8333-333333333333",
+        "surface": "book",
+        "originalSentence": "📚 Read this book, then book a room.",
+        "savedExcerpt": "Read this book.",
+        "occurrenceRanges": [
+          {
+            "start": 13,
+            "end": 17
+          }
+        ],
+        "excerptRanges": [
+          {
+            "start": 10,
+            "end": 14
+          }
+        ],
+        "annotation": {
+          "note": "保留原始时间和标点。"
+        },
+        "source": {
+          "type": "browser",
+          "title": "Example reading",
+          "url": "https://alice:secret@example.org:443/reading?token=private#book"
+        },
+        "occurredAt": "2026-09-15T09:30:00.000+08:00",
+        "timeZone": "Asia/Shanghai"
+      },
+      "sameAs": "astral_prefix_uses_utf16",
+      "expectedFingerprint": "b27f88dbe063a42503a460366202ad04c7fc2d68df7b34fc03b1788ca0f566ea"
+    },
+    {
+      "name": "url_private_parts_do_not_change_content",
+      "target": {
+        "kind": "book",
+        "bookId": "22222222-2222-4222-8222-222222222222"
+      },
+      "item": {
+        "eventId": "11111111-1111-4111-8111-111111111111",
+        "surface": "book",
+        "originalSentence": "📚 Read this book, then book a room.",
+        "savedExcerpt": "Read this book.",
+        "occurrenceRanges": [
+          {
+            "start": 13,
+            "end": 17
+          }
+        ],
+        "excerptRanges": [
+          {
+            "start": 10,
+            "end": 14
+          }
+        ],
+        "annotation": {
+          "note": "保留原始时间和标点。"
+        },
+        "source": {
+          "type": "browser",
+          "title": "Example reading",
+          "url": "https://example.org/reading?different=secret#other"
+        },
+        "occurredAt": "2026-09-15T09:30:00.000+08:00",
+        "timeZone": "Asia/Shanghai"
+      },
+      "sameAs": "astral_prefix_uses_utf16",
+      "expectedFingerprint": "b27f88dbe063a42503a460366202ad04c7fc2d68df7b34fc03b1788ca0f566ea"
+    },
+    {
+      "name": "pos_review_decision_does_not_change_content",
+      "target": {
+        "kind": "book",
+        "bookId": "22222222-2222-4222-8222-222222222222"
+      },
+      "item": {
+        "eventId": "11111111-1111-4111-8111-111111111111",
+        "surface": "book",
+        "originalSentence": "📚 Read this book, then book a room.",
+        "savedExcerpt": "Read this book.",
+        "occurrenceRanges": [
+          {
+            "start": 13,
+            "end": 17
+          }
+        ],
+        "excerptRanges": [
+          {
+            "start": 10,
+            "end": 14
+          }
+        ],
+        "annotation": {
+          "note": "保留原始时间和标点。"
+        },
+        "source": {
+          "type": "browser",
+          "title": "Example reading",
+          "url": "https://example.org/reading?different=secret#other"
+        },
+        "occurredAt": "2026-09-15T09:30:00.000+08:00",
+        "timeZone": "Asia/Shanghai",
+        "posReviewDecisionId": "00000040-0000-4000-8000-000000000040"
+      },
+      "sameAs": "astral_prefix_uses_utf16",
+      "expectedFingerprint": "b27f88dbe063a42503a460366202ad04c7fc2d68df7b34fc03b1788ca0f566ea"
+    },
+    {
+      "name": "target_change_is_conflict",
+      "target": {
+        "kind": "library"
+      },
+      "item": {
+        "eventId": "11111111-1111-4111-8111-111111111111",
+        "surface": "book",
+        "originalSentence": "📚 Read this book, then book a room.",
+        "savedExcerpt": "Read this book.",
+        "occurrenceRanges": [
+          {
+            "start": 13,
+            "end": 17
+          }
+        ],
+        "excerptRanges": [
+          {
+            "start": 10,
+            "end": 14
+          }
+        ],
+        "annotation": {
+          "note": "保留原始时间和标点。"
+        },
+        "source": {
+          "type": "browser",
+          "title": "Example reading",
+          "url": "https://alice:secret@example.org:443/reading?token=private#book"
+        },
+        "occurredAt": "2026-09-15T09:30:00.000+08:00",
+        "timeZone": "Asia/Shanghai"
+      },
+      "differentFrom": "astral_prefix_uses_utf16",
+      "expectedFingerprint": "86fcf0d445a042a50ba64a2ac74d27253cf6e6fe178103c5acf45bf2bb8b8e2f"
+    },
+    {
+      "name": "raw_timestamp_change_is_conflict",
+      "target": {
+        "kind": "book",
+        "bookId": "22222222-2222-4222-8222-222222222222"
+      },
+      "item": {
+        "eventId": "11111111-1111-4111-8111-111111111111",
+        "surface": "book",
+        "originalSentence": "📚 Read this book, then book a room.",
+        "savedExcerpt": "Read this book.",
+        "occurrenceRanges": [
+          {
+            "start": 13,
+            "end": 17
+          }
+        ],
+        "excerptRanges": [
+          {
+            "start": 10,
+            "end": 14
+          }
+        ],
+        "annotation": {
+          "note": "保留原始时间和标点。"
+        },
+        "source": {
+          "type": "browser",
+          "title": "Example reading",
+          "url": "https://alice:secret@example.org:443/reading?token=private#book"
+        },
+        "occurredAt": "2026-09-15T01:30:00Z",
+        "timeZone": "Asia/Shanghai"
+      },
+      "differentFrom": "astral_prefix_uses_utf16",
+      "expectedFingerprint": "e3fc5bf953269b7757a577b9b74db1cded60a172df5a752aea2d09f1dba5bfc9"
+    },
+    {
+      "name": "selected_word_presence_changes_content",
+      "target": {
+        "kind": "book",
+        "bookId": "22222222-2222-4222-8222-222222222222"
+      },
+      "item": {
+        "eventId": "11111111-1111-4111-8111-111111111111",
+        "surface": "book",
+        "originalSentence": "📚 Read this book, then book a room.",
+        "savedExcerpt": "Read this book.",
+        "occurrenceRanges": [
+          {
+            "start": 13,
+            "end": 17
+          }
+        ],
+        "excerptRanges": [
+          {
+            "start": 10,
+            "end": 14
+          }
+        ],
+        "annotation": {
+          "note": "保留原始时间和标点。"
+        },
+        "source": {
+          "type": "browser",
+          "title": "Example reading",
+          "url": "https://alice:secret@example.org:443/reading?token=private#book"
+        },
+        "occurredAt": "2026-09-15T09:30:00.000+08:00",
+        "timeZone": "Asia/Shanghai",
+        "selectedWordId": "44444444-4444-4444-8444-444444444444"
+      },
+      "differentFrom": "astral_prefix_uses_utf16",
+      "expectedFingerprint": "f4900970cb28dcd9e55084714b9afc0f44a5b02fa96cb709608762d292554233"
+    }
+  ],
+  "urlCases": [
+    {
+      "input": "https://alice:secret@example.org:443/reading?token=private#book",
+      "expected": "https://example.org/reading"
+    },
+    {
+      "input": "http://example.org:8080/a%20b?q=1#x",
+      "expected": "http://example.org:8080/a%20b"
+    },
+    {
+      "input": "https://example.org",
+      "expected": "https://example.org/"
+    },
+    {
+      "input": "file:///tmp/private",
+      "expected": ""
+    },
+    {
+      "input": "javascript:alert(1)",
+      "expected": ""
+    },
+    {
+      "input": "/relative",
+      "expected": ""
+    },
+    {
+      "input": "not a URL",
+      "expected": ""
+    }
+  ]
+}

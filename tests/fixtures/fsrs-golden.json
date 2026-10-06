@@ -1,0 +1,589 @@
+{
+  "profileId": "leximeet.fsrs6/1",
+  "referenceImplementation": "fsrs-6/java-fsrs-1.0.0",
+  "sourceRevision": "c561ee6c56239b621a0a45b16a6c2e688441eae5",
+  "numericTolerance": 1e-06,
+  "timestampToleranceMs": 0,
+  "vectors": [
+    {
+      "name": "initial-again",
+      "initialDueAt": "2022-11-29T12:30:00.000Z",
+      "initial": {
+        "state": "learning",
+        "step": 0,
+        "stability": null,
+        "difficulty": null,
+        "dueAt": "2022-11-29T12:30:00.000Z",
+        "lastReviewAt": null
+      },
+      "events": [
+        {
+          "rating": "again",
+          "occurredAt": "2022-11-29T12:30:00.000Z",
+          "expected": {
+            "state": "learning",
+            "step": 0,
+            "stability": 0.2172,
+            "difficulty": 7.0114,
+            "dueAt": "2022-11-29T12:31:00.000Z",
+            "lastReviewAt": "2022-11-29T12:30:00.000Z"
+          },
+          "intervalDays": 0
+        }
+      ]
+    },
+    {
+      "name": "initial-hard",
+      "initialDueAt": "2022-11-29T12:30:00.000Z",
+      "initial": {
+        "state": "learning",
+        "step": 0,
+        "stability": null,
+        "difficulty": null,
+        "dueAt": "2022-11-29T12:30:00.000Z",
+        "lastReviewAt": null
+      },
+      "events": [
+        {
+          "rating": "hard",
+          "occurredAt": "2022-11-29T12:30:00.000Z",
+          "expected": {
+            "state": "learning",
+            "step": 0,
+            "stability": 1.1771,
+            "difficulty": 6.243132948566265,
+            "dueAt": "2022-11-29T12:35:30.000Z",
+            "lastReviewAt": "2022-11-29T12:30:00.000Z"
+          },
+          "intervalDays": 0
+        }
+      ]
+    },
+    {
+      "name": "initial-good",
+      "initialDueAt": "2022-11-29T12:30:00.000Z",
+      "initial": {
+        "state": "learning",
+        "step": 0,
+        "stability": null,
+        "difficulty": null,
+        "dueAt": "2022-11-29T12:30:00.000Z",
+        "lastReviewAt": null
+      },
+      "events": [
+        {
+          "rating": "good",
+          "occurredAt": "2022-11-29T12:30:00.000Z",
+          "expected": {
+            "state": "learning",
+            "step": 1,
+            "stability": 3.2602,
+            "difficulty": 4.884631634813845,
+            "dueAt": "2022-11-29T12:40:00.000Z",
+            "lastReviewAt": "2022-11-29T12:30:00.000Z"
+          },
+          "intervalDays": 0
+        }
+      ]
+    },
+    {
+      "name": "initial-easy",
+      "initialDueAt": "2022-11-29T12:30:00.000Z",
+      "initial": {
+        "state": "learning",
+        "step": 0,
+        "stability": null,
+        "difficulty": null,
+        "dueAt": "2022-11-29T12:30:00.000Z",
+        "lastReviewAt": null
+      },
+      "events": [
+        {
+          "rating": "easy",
+          "occurredAt": "2022-11-29T12:30:00.000Z",
+          "expected": {
+            "state": "review",
+            "step": null,
+            "stability": 16.1507,
+            "difficulty": 2.482438522375997,
+            "dueAt": "2022-12-15T12:30:00.000Z",
+            "lastReviewAt": "2022-11-29T12:30:00.000Z"
+          },
+          "intervalDays": 16
+        }
+      ]
+    },
+    {
+      "name": "due-interval-sequence",
+      "initialDueAt": "2022-11-29T12:30:00.000Z",
+      "initial": {
+        "state": "learning",
+        "step": 0,
+        "stability": null,
+        "difficulty": null,
+        "dueAt": "2022-11-29T12:30:00.000Z",
+        "lastReviewAt": null
+      },
+      "events": [
+        {
+          "rating": "good",
+          "occurredAt": "2022-11-29T12:30:00.000Z",
+          "expected": {
+            "state": "learning",
+            "step": 1,
+            "stability": 3.2602,
+            "difficulty": 4.884631634813845,
+            "dueAt": "2022-11-29T12:40:00.000Z",
+            "lastReviewAt": "2022-11-29T12:30:00.000Z"
+          },
+          "intervalDays": 0
+        },
+        {
+          "rating": "good",
+          "occurredAt": "2022-11-29T12:40:00.000Z",
+          "expected": {
+            "state": "review",
+            "step": null,
+            "stability": 3.536243655619573,
+            "difficulty": 4.868056502338024,
+            "dueAt": "2022-12-03T12:40:00.000Z",
+            "lastReviewAt": "2022-11-29T12:40:00.000Z"
+          },
+          "intervalDays": 4
+        },
+        {
+          "rating": "good",
+          "occurredAt": "2022-12-03T12:40:00.000Z",
+          "expected": {
+            "state": "review",
+            "step": null,
+            "stability": 13.732137380726128,
+            "difficulty": 4.851595738276286,
+            "dueAt": "2022-12-17T12:40:00.000Z",
+            "lastReviewAt": "2022-12-03T12:40:00.000Z"
+          },
+          "intervalDays": 14
+        },
+        {
+          "rating": "good",
+          "occurredAt": "2022-12-17T12:40:00.000Z",
+          "expected": {
+            "state": "review",
+            "step": null,
+            "stability": 45.23094819820455,
+            "difficulty": 4.835248553486574,
+            "dueAt": "2023-01-31T12:40:00.000Z",
+            "lastReviewAt": "2022-12-17T12:40:00.000Z"
+          },
+          "intervalDays": 45
+        },
+        {
+          "rating": "good",
+          "occurredAt": "2023-01-31T12:40:00.000Z",
+          "expected": {
+            "state": "review",
+            "step": null,
+            "stability": 134.55039130980634,
+            "difficulty": 4.819014164271911,
+            "dueAt": "2023-06-15T12:40:00.000Z",
+            "lastReviewAt": "2023-01-31T12:40:00.000Z"
+          },
+          "intervalDays": 135
+        },
+        {
+          "rating": "good",
+          "occurredAt": "2023-06-15T12:40:00.000Z",
+          "expected": {
+            "state": "review",
+            "step": null,
+            "stability": 371.8835324313406,
+            "difficulty": 4.8028917923428285,
+            "dueAt": "2024-06-21T12:40:00.000Z",
+            "lastReviewAt": "2023-06-15T12:40:00.000Z"
+          },
+          "intervalDays": 372
+        },
+        {
+          "rating": "again",
+          "occurredAt": "2024-06-21T12:40:00.000Z",
+          "expected": {
+            "state": "relearning",
+            "step": 0,
+            "stability": 10.45468482029811,
+            "difficulty": 7.191563530203085,
+            "dueAt": "2024-06-21T12:50:00.000Z",
+            "lastReviewAt": "2024-06-21T12:40:00.000Z"
+          },
+          "intervalDays": 0
+        },
+        {
+          "rating": "again",
+          "occurredAt": "2024-06-21T12:50:00.000Z",
+          "expected": {
+            "state": "relearning",
+            "step": 0,
+            "stability": 2.1248019422142477,
+            "difficulty": 8.458523799659844,
+            "dueAt": "2024-06-21T13:00:00.000Z",
+            "lastReviewAt": "2024-06-21T12:50:00.000Z"
+          },
+          "intervalDays": 0
+        },
+        {
+          "rating": "good",
+          "occurredAt": "2024-06-21T13:00:00.000Z",
+          "expected": {
+            "state": "review",
+            "step": null,
+            "stability": 2.450947048707195,
+            "difficulty": 8.417288811246586,
+            "dueAt": "2024-06-23T13:00:00.000Z",
+            "lastReviewAt": "2024-06-21T13:00:00.000Z"
+          },
+          "intervalDays": 2
+        },
+        {
+          "rating": "good",
+          "occurredAt": "2024-06-23T13:00:00.000Z",
+          "expected": {
+            "state": "review",
+            "step": null,
+            "stability": 4.854047668754975,
+            "difficulty": 8.376338344253378,
+            "dueAt": "2024-06-28T13:00:00.000Z",
+            "lastReviewAt": "2024-06-23T13:00:00.000Z"
+          },
+          "intervalDays": 5
+        },
+        {
+          "rating": "good",
+          "occurredAt": "2024-06-28T13:00:00.000Z",
+          "expected": {
+            "state": "review",
+            "step": null,
+            "stability": 10.23479116645129,
+            "difficulty": 8.335670435482426,
+            "dueAt": "2024-07-08T13:00:00.000Z",
+            "lastReviewAt": "2024-06-28T13:00:00.000Z"
+          },
+          "intervalDays": 10
+        },
+        {
+          "rating": "good",
+          "occurredAt": "2024-07-08T13:00:00.000Z",
+          "expected": {
+            "state": "review",
+            "step": null,
+            "stability": 20.407457434674267,
+            "difficulty": 8.295283135281991,
+            "dueAt": "2024-07-28T13:00:00.000Z",
+            "lastReviewAt": "2024-07-08T13:00:00.000Z"
+          },
+          "intervalDays": 20
+        },
+        {
+          "rating": "good",
+          "occurredAt": "2024-07-28T13:00:00.000Z",
+          "expected": {
+            "state": "review",
+            "step": null,
+            "stability": 39.5120912568672,
+            "difficulty": 8.25517450745294,
+            "dueAt": "2024-09-06T13:00:00.000Z",
+            "lastReviewAt": "2024-07-28T13:00:00.000Z"
+          },
+          "intervalDays": 40
+        }
+      ]
+    },
+    {
+      "name": "memo-same-time",
+      "initialDueAt": "2022-11-29T12:30:00.000Z",
+      "initial": {
+        "state": "learning",
+        "step": 0,
+        "stability": null,
+        "difficulty": null,
+        "dueAt": "2022-11-29T12:30:00.000Z",
+        "lastReviewAt": null
+      },
+      "events": [
+        {
+          "rating": "again",
+          "occurredAt": "2022-11-29T12:30:00.000Z",
+          "expected": {
+            "state": "learning",
+            "step": 0,
+            "stability": 0.2172,
+            "difficulty": 7.0114,
+            "dueAt": "2022-11-29T12:31:00.000Z",
+            "lastReviewAt": "2022-11-29T12:30:00.000Z"
+          },
+          "intervalDays": 0
+        },
+        {
+          "rating": "good",
+          "occurredAt": "2022-11-29T12:30:00.000Z",
+          "expected": {
+            "state": "learning",
+            "step": 1,
+            "stability": 0.34769960763172647,
+            "difficulty": 6.980150165804394,
+            "dueAt": "2022-11-29T12:40:00.000Z",
+            "lastReviewAt": "2022-11-29T12:30:00.000Z"
+          },
+          "intervalDays": 0
+        },
+        {
+          "rating": "good",
+          "occurredAt": "2022-11-30T12:30:00.000Z",
+          "expected": {
+            "state": "review",
+            "step": null,
+            "stability": 1.9542392054002855,
+            "difficulty": 6.949115955464738,
+            "dueAt": "2022-12-02T12:30:00.000Z",
+            "lastReviewAt": "2022-11-30T12:30:00.000Z"
+          },
+          "intervalDays": 2
+        },
+        {
+          "rating": "good",
+          "occurredAt": "2022-12-03T12:30:00.000Z",
+          "expected": {
+            "state": "review",
+            "step": null,
+            "stability": 6.929102112157201,
+            "difficulty": 6.918295881176426,
+            "dueAt": "2022-12-10T12:30:00.000Z",
+            "lastReviewAt": "2022-12-03T12:30:00.000Z"
+          },
+          "intervalDays": 7
+        },
+        {
+          "rating": "good",
+          "occurredAt": "2022-12-11T12:30:00.000Z",
+          "expected": {
+            "state": "review",
+            "step": null,
+            "stability": 19.454748644340807,
+            "difficulty": 6.887688465400703,
+            "dueAt": "2022-12-30T12:30:00.000Z",
+            "lastReviewAt": "2022-12-11T12:30:00.000Z"
+          },
+          "intervalDays": 19
+        },
+        {
+          "rating": "good",
+          "occurredAt": "2023-01-01T12:30:00.000Z",
+          "expected": {
+            "state": "review",
+            "step": null,
+            "stability": 49.44723741648006,
+            "difficulty": 6.857292240793832,
+            "dueAt": "2023-02-19T12:30:00.000Z",
+            "lastReviewAt": "2023-01-01T12:30:00.000Z"
+          },
+          "intervalDays": 49
+        },
+        {
+          "rating": "good",
+          "occurredAt": "2023-01-01T12:30:00.000Z",
+          "expected": {
+            "state": "review",
+            "step": null,
+            "stability": 49.44723741648006,
+            "difficulty": 6.827105750136749,
+            "dueAt": "2023-02-19T12:30:00.000Z",
+            "lastReviewAt": "2023-01-01T12:30:00.000Z"
+          },
+          "intervalDays": 49
+        }
+      ]
+    },
+    {
+      "name": "mixed-timeline",
+      "initialDueAt": "2022-11-29T12:30:00.000Z",
+      "initial": {
+        "state": "learning",
+        "step": 0,
+        "stability": null,
+        "difficulty": null,
+        "dueAt": "2022-11-29T12:30:00.000Z",
+        "lastReviewAt": null
+      },
+      "events": [
+        {
+          "rating": "again",
+          "occurredAt": "2022-11-29T12:30:00.000Z",
+          "expected": {
+            "state": "learning",
+            "step": 0,
+            "stability": 0.2172,
+            "difficulty": 7.0114,
+            "dueAt": "2022-11-29T12:31:00.000Z",
+            "lastReviewAt": "2022-11-29T12:30:00.000Z"
+          },
+          "intervalDays": 0
+        },
+        {
+          "rating": "hard",
+          "occurredAt": "2022-11-29T12:31:00.000Z",
+          "expected": {
+            "state": "learning",
+            "step": 0,
+            "stability": 0.16365145806222992,
+            "difficulty": 7.671557283421727,
+            "dueAt": "2022-11-29T12:36:30.000Z",
+            "lastReviewAt": "2022-11-29T12:31:00.000Z"
+          },
+          "intervalDays": 0
+        },
+        {
+          "rating": "good",
+          "occurredAt": "2022-11-29T12:36:00.000Z",
+          "expected": {
+            "state": "learning",
+            "step": 1,
+            "stability": 0.2728542535074799,
+            "difficulty": 7.635752363970511,
+            "dueAt": "2022-11-29T12:46:00.000Z",
+            "lastReviewAt": "2022-11-29T12:36:00.000Z"
+          },
+          "intervalDays": 0
+        },
+        {
+          "rating": "good",
+          "occurredAt": "2022-11-29T12:46:00.000Z",
+          "expected": {
+            "state": "review",
+            "step": null,
+            "stability": 0.42270620077303556,
+            "difficulty": 7.600194498463508,
+            "dueAt": "2022-11-30T12:46:00.000Z",
+            "lastReviewAt": "2022-11-29T12:46:00.000Z"
+          },
+          "intervalDays": 1
+        },
+        {
+          "rating": "again",
+          "occurredAt": "2022-12-04T12:30:00.000Z",
+          "expected": {
+            "state": "relearning",
+            "step": 0,
+            "stability": 0.3288421527985491,
+            "difficulty": 8.675263167170996,
+            "dueAt": "2022-12-04T12:40:00.000Z",
+            "lastReviewAt": "2022-12-04T12:30:00.000Z"
+          },
+          "intervalDays": 0
+        },
+        {
+          "rating": "good",
+          "occurredAt": "2022-12-04T12:40:00.000Z",
+          "expected": {
+            "state": "review",
+            "step": null,
+            "stability": 0.49596098901837293,
+            "difficulty": 8.632532677121912,
+            "dueAt": "2022-12-05T12:40:00.000Z",
+            "lastReviewAt": "2022-12-04T12:40:00.000Z"
+          },
+          "intervalDays": 1
+        },
+        {
+          "rating": "easy",
+          "occurredAt": "2022-12-07T12:30:00.000Z",
+          "expected": {
+            "state": "review",
+            "step": null,
+            "stability": 5.214601463430104,
+            "difficulty": 8.273735975407378,
+            "dueAt": "2022-12-12T12:30:00.000Z",
+            "lastReviewAt": "2022-12-07T12:30:00.000Z"
+          },
+          "intervalDays": 5
+        },
+        {
+          "rating": "good",
+          "occurredAt": "2022-12-27T12:30:00.000Z",
+          "expected": {
+            "state": "review",
+            "step": null,
+            "stability": 19.450195008951404,
+            "difficulty": 8.233776022981463,
+            "dueAt": "2023-01-15T12:30:00.000Z",
+            "lastReviewAt": "2022-12-27T12:30:00.000Z"
+          },
+          "intervalDays": 19
+        }
+      ]
+    },
+    {
+      "name": "equal-time-order",
+      "initialDueAt": "2022-11-29T12:30:00.000Z",
+      "initial": {
+        "state": "learning",
+        "step": 0,
+        "stability": null,
+        "difficulty": null,
+        "dueAt": "2022-11-29T12:30:00.000Z",
+        "lastReviewAt": null
+      },
+      "events": [
+        {
+          "rating": "again",
+          "occurredAt": "2022-11-29T12:30:00.000Z",
+          "expected": {
+            "state": "learning",
+            "step": 0,
+            "stability": 0.2172,
+            "difficulty": 7.0114,
+            "dueAt": "2022-11-29T12:31:00.000Z",
+            "lastReviewAt": "2022-11-29T12:30:00.000Z"
+          },
+          "intervalDays": 0
+        },
+        {
+          "rating": "hard",
+          "occurredAt": "2022-11-29T12:30:00.000Z",
+          "expected": {
+            "state": "learning",
+            "step": 0,
+            "stability": 0.16365145806222992,
+            "difficulty": 7.671557283421727,
+            "dueAt": "2022-11-29T12:35:30.000Z",
+            "lastReviewAt": "2022-11-29T12:30:00.000Z"
+          },
+          "intervalDays": 0
+        },
+        {
+          "rating": "good",
+          "occurredAt": "2022-11-29T12:30:00.000Z",
+          "expected": {
+            "state": "learning",
+            "step": 1,
+            "stability": 0.2728542535074799,
+            "difficulty": 7.635752363970511,
+            "dueAt": "2022-11-29T12:40:00.000Z",
+            "lastReviewAt": "2022-11-29T12:30:00.000Z"
+          },
+          "intervalDays": 0
+        },
+        {
+          "rating": "easy",
+          "occurredAt": "2022-11-29T12:30:00.000Z",
+          "expected": {
+            "state": "review",
+            "step": null,
+            "stability": 0.8980963682975179,
+            "difficulty": 7.053230152829852,
+            "dueAt": "2022-11-30T12:30:00.000Z",
+            "lastReviewAt": "2022-11-29T12:30:00.000Z"
+          },
+          "intervalDays": 1
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "compression": {
+    "checksum": true,
+    "content_size": false,
+    "format": "zstd",
+    "level": 9,
+    "python_zstandard": "0.25.0",
+    "threads": 0,
+    "zstd_version": "1.5.7"
+  },
+  "core": {
+    "manifest_sha256": "da48113330a5751c592444e5c8791e1b2d7526b75bbbcd59c535a9cdddad2b74",
+    "version": "0.0.2"
+  },
+  "full": {
+    "bytes": 163014067,
+    "entries_asset": "full.entries.jsonl.gz",
+    "entry_count": 811092,
+    "manifest_sha256": "dc8b6d2ddba34bcb65c99fa45d5af1994a2bd31b198dd2f8700817ff081e8c64",
+    "sha256": "7f971028cd5fc829b2c27226f1e46221a45423e98f964ccc0f298cbcd4f8919b",
+    "version": "0.0.1"
+  },
+  "function_words_sha256": "13e7c2be2864c56c4ab584e6353c918819053b093e80d2a4f23046e4cd20f72c",
+  "schema_version": "leximeet.package-sources.v1"
+}

@@ -1,0 +1,118 @@
+{
+  "format": "leximeet.documentation-screenshots/1",
+  "capturedAt": "2026-10-05",
+  "softwareVersion": "1.0.0",
+  "method": "真实无头会话；正文和原生SIDE_PANEL原图并排展示，不绘制浏览器工具栏。",
+  "data": "隔离测试资料和示例文章，不包含个人数据库或日常账号。",
+  "scope": "只展示所列场景，不代替完整发行、安装或平台验收。",
+  "files": [
+    {
+      "file": "choice-feedback-dark.png",
+      "sha256": "8e9c28aaee72e989337a1f53788168c547ae243f8d1585899e3dfe2d8fe0b776"
+    },
+    {
+      "file": "choice-feedback-light.png",
+      "sha256": "2ce48043ca4d3fa7082ea876e30cc5cb36a7c66c003af9136d19e9e727f131a0"
+    },
+    {
+      "file": "usage-capture-settings.png",
+      "sha256": "a48707f2e57afff5c6422bdfaa4ed5527fca0d967e6c04950aa56f90401a3341"
+    },
+    {
+      "file": "usage-capture-workspace.png",
+      "sha256": "b544f2a0f4f033de63c4389246e2cf7265226142f67aaacb296d3dcd963d2487"
+    },
+    {
+      "file": "usage-capture.png",
+      "sha256": "5162d38f541b93107089e82e6680e0665807799339bd3c8b9019ccd22d580752"
+    },
+    {
+      "file": "usage-connected-desktop-encounters.png",
+      "sha256": "fdcc6349733852860c31808b1d02dd8d4077a9423f931198a2976424fc9a85ea"
+    },
+    {
+      "file": "usage-connected-settings.png",
+      "sha256": "95058c6921642938eed43ca1dea9428b46096c31646d9440fbf7b0efa2949969"
+    },
+    {
+      "file": "usage-connected-workspace.png",
+      "sha256": "58a71166704498f6aa9209953cb257e2b6a89cd63c35b110486492aa89d8c6e5"
+    },
+    {
+      "file": "usage-copy-dark.png",
+      "sha256": "b56c7e8b8ef44518efb4e4f3f5ac0228dd4e8178cf5d3a060c9db14dcc728fa7"
+    },
+    {
+      "file": "usage-copy-light.png",
+      "sha256": "4c404c431ac051466617e864688cf22ca44a706e927047debd4608978cd2fb0f"
+    },
+    {
+      "file": "usage-copy-narrow-dark.png",
+      "sha256": "2d4d4ab99f3a3ee4b2f50d09af0a587d1ea21486d3cdd65d30f1387940a2575a"
+    },
+    {
+      "file": "usage-copy-narrow-light.png",
+      "sha256": "84618d9c4e9b2ff3a9ab6cf7bea4b394e4828af726b67c4935fcc0979f29337a"
+    },
+    {
+      "file": "usage-first-install.png",
+      "sha256": "9366377cb13957396832e08f17951865d7a0f7fe8f096ce6b424f6eaf974be2f"
+    },
+    {
+      "file": "usage-goal.png",
+      "sha256": "2b26cc34d1068c97083778905f0ee938a52f234a1845bc61b3843c28fe737ff8"
+    },
+    {
+      "file": "usage-library-bulk.png",
+      "sha256": "cc1cc7421858c82e28d6a4bb18d96de211fb756c4b9ad5ec676d2065284f1927"
+    },
+    {
+      "file": "usage-library.png",
+      "sha256": "89347626846a691cdfec4f67066d0a8a022fc2926726e9a4193d5c1db8994084"
+    },
+    {
+      "file": "usage-listening-hint.png",
+      "sha256": "d29613b2380f80c0bb9e685cad89093497859ce943179edafc48027146ec7212"
+    },
+    {
+      "file": "usage-personal-note.png",
+      "sha256": "390bfcf6a8ab37c3b6720667447424f0eebd3500b46a8d2372ecb50e514b4db0"
+    },
+    {
+      "file": "usage-plan.png",
+      "sha256": "cab69e377cf1216b484810d8694c20479e6ce923623a6eca39d2bf050774d324"
+    },
+    {
+      "file": "usage-practice-cloze.png",
+      "sha256": "38260c3ac979f432fa51faa6b91f3ca506393289cd3c5a1e7ba21a48642d302d"
+    },
+    {
+      "file": "usage-practice-list.png",
+      "sha256": "c17e80c4d28404b6376723b5aa5f0270bedbf9c467e22287a5f3af4215780f4c"
+    },
+    {
+      "file": "usage-practice-listening.png",
+      "sha256": "06290c3d65a55bf59e2b27cf900aee6b8bff12474676583bcab77552d3e82d9e"
+    },
+    {
+      "file": "usage-practice-recall.png",
+      "sha256": "21a5a1b00a90f61ed478b978556bff6709f7060483308b88bb22514bc60a56fb"
+    },
+    {
+      "file": "usage-reading-workspace-dark.png",
+      "sha256": "f5ea7cc3f29ede142af209e540ea999a7a27f6fef7fe0cd8557d05a5e4b9de6e"
+    },
+    {
+      "file": "usage-reading-workspace-light.png",
+      "sha256": "9d738b60b1015a659e58bea7c951420e9320dd0fa15755eddda4b755bc9a3ec6"
+    },
+    {
+      "file": "usage-recycle-confirmation.png",
+      "sha256": "04b00e106222302ee6ab96e86ef0c4f046918b6bca7b7bce65ba969ab9d2b913"
+    },
+    {
+      "file": "usage-saved-workspace.png",
+      "sha256": "314db78557a35d3551e475d3b41311f7da531f9fbe0b7471efa9e0d9f718852b"
+    }
+  ]
+}

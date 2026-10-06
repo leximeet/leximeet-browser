@@ -1,0 +1,17 @@
+sequenceDiagram
+  participant U as 用户确认窗
+  participant P as 插件后台
+  participant N as Native Host
+  participant D as Desktop Main/Core
+  P->>N: 发现运行状态
+  N->>D: 控制通道
+  D-->>P: 安全发现信息
+  Note over P: 通知，不自动配对
+  P->>D: 用户主动请求邀请
+  P->>U: 固定URL确认窗
+  U->>P: 接受邀请
+  Note over P: 持久原邀请，原子封存A
+  P->>D: pair原邀请
+  D-->>P: 会话与工作区
+  P->>D: 读取词卡 / capture词与语境
+  D-->>P: 真实回执

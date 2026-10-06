@@ -1,0 +1,30 @@
+node_modules/
+.wxt/
+.output/
+test-results/
+playwright-report/
+.env.local
+*.log
+.DS_Store
+# 源自固定 leximeet-dictionary Release 的大体积生成资产，不进入代码提交。
+/public/dictionaries/core/
+
+.dictionary-release/
+
+# 由冻结合同生成，构建与 zip 均包含同一客户端声明。
+public/lmcp-readiness.json
+
+# 私人提交备忘、凭据和本机验收产物不进入公开仓库。
+git-commit-message.txt
+.env
+.env.*
+!.env.example
+coverage/
+.private/
+.store-submission/
+/release/
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore

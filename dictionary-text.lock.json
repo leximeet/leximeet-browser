@@ -1,0 +1,10 @@
+{
+  "schema": "leximeet.browser-text-lock.v1",
+  "dictionaryVersion": "0.0.3",
+  "releaseSha256": "8c9392ddf92c3bf3b0f471075b55c5042826a08129c4aa1efbbe9cd922926317",
+  "entryCount": 26417,
+  "coreEntryCount": 117902,
+  "audioCount": 0,
+  "catalogCount": 23,
+  "releaseBaseUrl": "https://github.com/leximeet/leximeet-dictionary/releases/download/v0.0.3/"
+}

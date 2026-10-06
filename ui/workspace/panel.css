@@ -1,0 +1,628 @@
+/* 侧栏以列表为主，分区标题/色底/分隔线明确区分网页、列表与词卡。 */
+.lm-panel {
+  height: 100dvh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: var(--text);
+  background: var(--surface);
+  font-size: 12px;
+}
+.lm-panel > :not(.lm-results) {
+  flex-shrink: 0;
+}
+.lm-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.lm-icon {
+  width: 30px;
+  height: 30px;
+  padding: 7px;
+  border-radius: 6px;
+}
+.lm-icon:hover {
+  background: var(--accent-soft);
+}
+.lm-asset-icon {
+  width: 16px;
+  height: 16px;
+}
+.lm-panel[data-theme="dark"] .lm-asset-icon {
+  filter: invert(1);
+}
+.lm-local-banner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+}
+.lm-local-banner .lm-muted {
+  margin-left: auto;
+}
+.lm-dot,
+.lm-capturing i {
+  width: 6px;
+  height: 6px;
+  display: inline-block;
+  background: var(--accent);
+  border-radius: 50%;
+}
+.lm-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--line);
+}
+.lm-tabs button {
+  min-height: 42px;
+  padding: 10px;
+  font-size: 13px;
+  border-bottom: 2px solid transparent;
+}
+.lm-tabs button.active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.lm-analysis {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.lm-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.lm-capturing {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--accent);
+}
+.lm-capturing i {
+  animation: lm-breathe 1.2s ease-in-out infinite alternate;
+}
+.lm-page-title {
+  font-size: 13px;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lm-page-host {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  margin: 4px 0 8px;
+  color: var(--muted);
+}
+.lm-muted {
+  color: var(--muted);
+  line-height: 1.6;
+}
+.lm-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.lm-primary {
+  background: var(--accent);
+  color: var(--primary-text, #fff);
+  padding: 9px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  white-space: nowrap;
+  min-height: 35px;
+}
+.lm-subtle {
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  min-height: 35px;
+}
+.lm-primary:disabled {
+  opacity: 0.5;
+}
+.lm-site-enable {
+  color: var(--accent);
+  font-size: 11px;
+  text-align: left;
+}
+.lm-region-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 16px;
+  color: var(--muted);
+  background: var(--subtle);
+  border-bottom: 1px solid var(--line);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  flex: none;
+}
+.lm-region-title strong {
+  color: var(--text);
+  font-weight: 600;
+}
+.lm-region-title button {
+  color: var(--accent);
+  font-size: 10px;
+}
+.lm-results {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 45%;
+  min-height: 140px;
+  overflow: hidden;
+  border-bottom: 2px solid var(--line);
+}
+.lm-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--line);
+  flex: none;
+}
+.lm-search input {
+  width: 100%;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  font-size: 12px;
+  color: var(--text);
+  padding: 0;
+  box-shadow: none;
+}
+.lm-result-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.lm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 45px;
+  text-align: left;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.lm-row span:first-child {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+.lm-row strong {
+  font:
+    18px Georgia,
+    serif;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lm-row small {
+  color: var(--muted);
+  font-size: 10px;
+  white-space: nowrap;
+}
+.lm-row.selected {
+  background: var(--accent-soft);
+  box-shadow: inset 2px 0 var(--accent);
+}
+.lm-row:hover {
+  background: var(--subtle);
+}
+.lm-row.incoming {
+  animation: lm-picked 0.8s ease-out;
+}
+.lm-pick-flight {
+  position: absolute;
+  left: 16px;
+  top: 72px;
+  z-index: 2;
+  background: var(--accent);
+  color: var(--primary-text, #fff);
+  padding: 6px 12px;
+  border-radius: 18px;
+  font:
+    16px Georgia,
+    serif;
+  pointer-events: none;
+  animation: lm-arrive 0.8s ease-out both;
+}
+.lm-empty {
+  height: 100%;
+  min-height: 120px;
+  padding: 24px 22px;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  line-height: 1.8;
+  text-align: center;
+  font-size: 11px;
+}
+.lm-empty img {
+  width: 24px;
+  height: 24px;
+  opacity: 0.4;
+}
+.lm-empty strong {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+.lm-empty span {
+  max-width: 230px;
+}
+.lm-detail {
+  display: flex;
+  flex-direction: column;
+  min-height: 90px;
+  max-height: 46dvh;
+  flex: 0 1 auto !important;
+  overflow: hidden;
+}
+.lm-card-body {
+  padding: 18px 20px;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.lm-card-empty {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 4px 0 10px;
+}
+.lm-detail .v3-word-card {
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  max-width: none;
+  position: relative;
+}
+.lm-detail .v3-card-heading {
+  position: absolute;
+  right: 0;
+  top: 2px;
+  border: 0;
+  padding: 0;
+}
+.lm-detail .v3-card-heading > small {
+  display: none;
+}
+.lm-detail .v3-card-heading button {
+  padding: 4px;
+}
+.lm-detail .v3-word-card > header {
+  margin: 0;
+  padding-right: 28px;
+  justify-content: flex-start;
+  gap: 10px;
+}
+.lm-detail .v3-word-card h2 {
+  font: 32px/1.25 var(--reading-font);
+  margin: 0;
+}
+.lm-detail .v3-card-pronunciation {
+  font-size: 12px;
+  margin: 8px 0;
+}
+.lm-detail .v3-card-summary {
+  font-size: 13px;
+  line-height: 1.8;
+  margin: 10px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.lm-detail .v3-card-origin {
+  gap: 4px;
+  margin: 12px 0;
+}
+.lm-detail .v3-card-origin span {
+  font-size: 10px;
+}
+.lm-detail .v3-tabs button {
+  font-size: 11px;
+}
+.v3-card-expand {
+  font-size: 10px;
+  color: var(--accent);
+  padding: 3px 0;
+  text-align: left;
+}
+.lm-submit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--line);
+  background: var(--subtle);
+}
+.lm-submit-target {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+.lm-submit-target > span {
+  font-size: 10px;
+  color: var(--muted);
+}
+.lm-submit-target select {
+  max-width: 175px;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 11px;
+}
+.lm-alert,
+.lm-notice {
+  padding: 7px 16px;
+  font-size: 11px;
+  color: var(--accent);
+  border-top: 1px solid var(--line);
+}
+.lm-alert {
+  color: var(--danger);
+}
+.lm-footer {
+  padding: 9px 16px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 10px;
+}
+.lm-footer button {
+  color: var(--accent);
+}
+.lm-panel .v3-dialog {
+  width: calc(100vw - 24px);
+  max-width: 480px;
+  max-height: calc(100dvh - 24px);
+  padding: 0;
+  color: var(--text);
+  background: var(--surface);
+}
+.lm-panel .v3-dialog h2 {
+  font-size: 17px;
+  line-height: 1.5;
+}
+.lm-confirm-book {
+  display: grid;
+  gap: 7px;
+  margin: 16px 0;
+}
+.lm-confirm-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 20px;
+}
+.lm-draft-edit {
+  display: grid;
+  gap: 12px;
+}
+.lm-draft-edit label {
+  display: grid;
+  gap: 6px;
+}
+.lm-draft-edit :is(input, textarea) {
+  width: 100%;
+  border: 1px solid var(--line);
+  color: var(--text);
+  background: var(--surface);
+  padding: 8px;
+  border-radius: 5px;
+}
+@keyframes lm-picked {
+  0%,
+  30% {
+    background: var(--accent-soft);
+    transform: translateX(-15px);
+    opacity: 0.1;
+  }
+  70% {
+    background: var(--accent-soft);
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes lm-arrive {
+  0%,
+  35% {
+    transform: translateX(-85px) scale(0.7);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  85%,
+  100% {
+    transform: translateX(6px) scale(0.65);
+    opacity: 0;
+  }
+}
+@keyframes lm-breathe {
+  to {
+    opacity: 0.3;
+  }
+}
+@media (max-height: 650px) {
+  .lm-header {
+    padding: 7px 12px;
+  }
+  .lm-analysis {
+    padding: 9px 12px;
+  }
+  .lm-detail {
+    max-height: 36dvh;
+  }
+  .lm-results {
+    min-height: 95px;
+  }
+  .lm-region-title {
+    padding: 7px 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lm-row.incoming,
+  .lm-pick-flight,
+  .lm-capturing i {
+    animation: none;
+  }
+  .lm-pick-flight {
+    display: none;
+  }
+}
+
+/* 转圈只表示正在执行；采集中维持抓手与状态点，避免一直显示加载。 */
+.lm-spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: lm-spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+@keyframes lm-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.lm-switch-source {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lm-spinner {
+    animation: none;
+  }
+}
+
+/* 管理入口只保留一个；原生 Chrome 顶栏负责关闭阅读侧栏。 */
+.lm-manage-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--accent-strong);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.lm-manage-button:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.lm-analysis {
+  padding: 10px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.lm-analysis > .lm-muted {
+  margin: 0;
+  width: 100%;
+}
+.lm-actions {
+  margin: 0;
+  flex: 1;
+}
+.lm-analysis > .lm-capturing {
+  order: 2;
+  margin-left: auto;
+  font-size: 10px;
+}
+.lm-panel[data-theme="dark"] .lm-empty img {
+  filter: invert(1);
+  opacity: 0.6;
+}
+.lm-panel[data-theme="dark"] .lm-primary {
+  color: var(--primary-text);
+}
+.lm-panel[data-theme="dark"] .lm-tabs button.active {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+.lm-connection {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 主要操作与管理同一行；词卡有固定阅读空间，列表保留独立滚动。 */
+.lm-header .lm-manage-button {
+  margin-left: auto;
+}
+.lm-access-note {
+  margin: 0;
+  padding: 8px 16px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.lm-detail.has-word {
+  flex: 0 0 40dvh !important;
+  min-height: 200px;
+}
+@media (max-height: 650px) {
+  .lm-detail.has-word {
+    flex-basis: 34dvh !important;
+    min-height: 140px;
+  }
+  .lm-card-body {
+    padding: 12px 16px;
+  }
+}
+
+/* 关闭真实侧栏与跳过教学使用不同的明确动作。 */
+.v3-coach-actions:has(.v3-coach-primary) {
+  flex-wrap: wrap;
+}
+.v3-coach-actions .v3-coach-primary {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 6px;
+  background: var(--accent, #18765d);
+  color: var(--accent-ink, #fff);
+  border: 0;
+  text-align: center;
+}

@@ -1,0 +1,5 @@
+flowchart LR
+  Independent[浏览器独立资料] -->|确认连接| Archive[原资料封存]
+  Archive --> Reading[浏览器继续阅读和采集]
+  Reading --> Desktop[桌面端查询与保存]
+  Desktop -->|明确断开| Restore[恢复原浏览器资料]

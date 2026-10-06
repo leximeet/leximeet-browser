@@ -1,0 +1,9 @@
+{
+  "schema": "leximeet.browser-core-lock.v1",
+  "dictionaryVersion": "0.0.2",
+  "releaseSha256": "da48113330a5751c592444e5c8791e1b2d7526b75bbbcd59c535a9cdddad2b74",
+  "entryCount": 117902,
+  "audioCount": 117902,
+  "catalogCount": 23,
+  "sourceCommit": "v0.0.2"
+}

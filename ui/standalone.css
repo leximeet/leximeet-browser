@@ -1,0 +1,10 @@
+@import "./workspace/base.css";
+@import "./workspace/runtime.css";
+
+@import "./workspace/panel.css";
+/* 正式管理页的布局分开维护，不继续叠加历史原型的页面选择器。 */
+@import "./workspace/layout.css";
+@import "./workspace/library.css";
+@import "./workspace/practice.css";
+
+@import "./workspace/coachmark.css";

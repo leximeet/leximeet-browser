@@ -1,0 +1,53 @@
+name: Browser standalone CI
+on:
+  push:
+    branches: [main]
+    # 本仓发布标签与应用版本一致，如 1.0.0，不加 v 前缀。
+    tags: ["[0-9]*"]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: browser-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  browser:
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - name: 设置本轮临时公开词包和报告目录
+        run: |
+          printf 'LEXIMEET_DICTIONARY_RELEASE_DIR=%s/leximeet-dictionary-v0.0.3\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          printf 'LEXIMEET_TEST_OUTPUT=%s/browser-standalone\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+      # fork PR在一次性runner执行，不继承生产secret，不用pull_request_target。
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
+        id: dictionary-cache
+        with:
+          path: ${{ env.LEXIMEET_DICTIONARY_RELEASE_DIR }}
+          key: dictionary-v0.0.3-text-${{ hashFiles('dictionary-text.lock.json') }}
+      - name: 获取并核验固定Lite与Core公开词包
+        run: npm run fetch:dictionary -- --with-core
+      - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5
+        if: steps.dictionary-cache.outputs.cache-hit != 'true'
+        with:
+          path: ${{ env.LEXIMEET_DICTIONARY_RELEASE_DIR }}
+          key: dictionary-v0.0.3-text-${{ hashFiles('dictionary-text.lock.json') }}
+      - run: npx playwright install chromium
+      - name: 格式、类型、单元、正式构建、清单与完整无头UI
+        run: npm run verify
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        if: always()
+        with:
+          name: browser-standalone-macos-arm64
+          path: |
+            ${{ env.LEXIMEET_TEST_OUTPUT }}
+          retention-days: 14

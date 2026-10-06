@@ -1,0 +1,22 @@
+{
+  "formatVersion": 1,
+  "description": "当前开发契约的 UUID 与 UTF-16 字段预算，不提供历史格式转换或升级。词本名称沿用 Core 80 UTF-16。",
+  "validIds": ["00000020-0000-4000-8000-000000000020", "abcdef12-3456-4789-abcd-abcdef123456", "ABCDEF12-3456-4789-ABCD-ABCDEF123456"],
+  "invalidIds": ["", "word_1", "book-1", "../word", "词条", " abcdef12-3456-4789-abcd-abcdef123456", "abcdef12-3456-4789-abcd-abcdef123456 ", "abcdef12-3456-4789-abcd-abcdef123456\n", "abcdef1234564789abcdabcdef123456", 12, null],
+  "wordCases": [
+    {"name": "ascii_101", "textUnit": "a", "repetitions": 101, "wordValid": true, "normalizedUnit": "a", "normalizedValid": true},
+    {"name": "ascii_120", "textUnit": "a", "repetitions": 120, "wordValid": true, "normalizedUnit": "a", "normalizedValid": true},
+    {"name": "word_over_120", "textUnit": "a", "repetitions": 121, "wordValid": false, "normalizedUnit": "a", "normalizedValid": true},
+    {"name": "unicode_lowercase_expansion", "textUnit": "İ", "repetitions": 120, "wordValid": true, "normalizedUnit": "i̇", "normalizedValid": true},
+    {"name": "utf16_120", "textUnit": "😀", "repetitions": 60, "wordValid": true, "normalizedUnit": "😀", "normalizedValid": true},
+    {"name": "utf16_over_120", "textUnit": "😀", "repetitions": 61, "wordValid": false, "normalizedUnit": "😀", "normalizedValid": true},
+    {"name": "normalized_over_240", "textUnit": "İ", "repetitions": 121, "wordValid": false, "normalizedUnit": "i̇", "normalizedValid": false}
+  ],
+  "bookNameCases": [
+    {"name": "ascii_80", "textUnit": "a", "repetitions": 80, "valid": true},
+    {"name": "ascii_81", "textUnit": "a", "repetitions": 81, "valid": false},
+    {"name": "cjk_80", "textUnit": "词", "repetitions": 80, "valid": true},
+    {"name": "utf16_80_emoji", "textUnit": "😀", "repetitions": 40, "valid": true},
+    {"name": "utf16_over_80_emoji", "textUnit": "😀", "repetitions": 41, "valid": false}
+  ]
+}

@@ -1,0 +1,63 @@
+name: Browser actual candidate replacement
+on:
+  workflow_dispatch:
+    inputs:
+      baseline_ref:
+        description: "已发布的前一Browser正式tag；首发可选同格式候选，不用0.x/rc旧模型"
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  replacement:
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - name: 设置本轮临时公开词包和报告目录
+        run: |
+          printf 'LEXIMEET_DICTIONARY_RELEASE_DIR=%s/leximeet-dictionary-v0.0.3\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          printf 'LEXIMEET_TEST_OUTPUT=%s/browser-replacement\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          path: current
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.baseline_ref }}
+          path: previous
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: |
+            current/package-lock.json
+            previous/package-lock.json
+      - name: 记录两份实际提交，拒绝相同源码冒充替换
+        run: |
+          mkdir -p "$LEXIMEET_TEST_OUTPUT"
+          git -C current rev-parse HEAD > "$LEXIMEET_TEST_OUTPUT/current-sha.txt"
+          git -C previous rev-parse HEAD > "$LEXIMEET_TEST_OUTPUT/previous-sha.txt"
+          test "$(cat "$LEXIMEET_TEST_OUTPUT/current-sha.txt")" != "$(cat "$LEXIMEET_TEST_OUTPUT/previous-sha.txt")"
+      - run: npm ci
+        working-directory: current
+      - run: npm ci
+        working-directory: previous
+      - run: npm run build
+        working-directory: previous
+      - run: npm run build && npm run verify:manifest
+        working-directory: current
+      - run: npx playwright install chromium
+        working-directory: current
+      - name: 完整退出、真实包替换、同profile新进程与事实核对
+        working-directory: current
+        run: |
+          export LEXIMEET_UPGRADE_FROM="$GITHUB_WORKSPACE/previous/.output/chrome-mv3"
+          npm run test:upgrade
+      # 相同manifest版本仅称候选替换；不能由该工作流冒称不同版本升级或商店发行。
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        if: always()
+        with:
+          name: browser-current-format-replacement
+          path: ${{ env.LEXIMEET_TEST_OUTPUT }}
+          retention-days: 14

@@ -1,0 +1,52 @@
+{
+  "base_release_manifest_sha256": "dc8b6d2ddba34bcb65c99fa45d5af1994a2bd31b198dd2f8700817ff081e8c64",
+  "dictionary_by_gpt4": {
+    "bytes": 17077970,
+    "sha256": "51bc73affec742690d9683f282f8944e7a191e94592ca9c7c2a317e5f92fb5d0"
+  },
+  "dictionary_by_gpt4_commit": "8c9b050",
+  "qwerty": {
+    "BIOmedical": {
+      "bytes": 47526,
+      "sha256": "aae7393324b95ca537ec3d832d13b6e5ed021da2211003854dd7bb90e88a6eff"
+    },
+    "CET4_T": {
+      "bytes": 499501,
+      "sha256": "733dd9f9c05ed9e3c35fbd65608e4e061e2d34c461723e057513e346562992de"
+    },
+    "CET6_T": {
+      "bytes": 481442,
+      "sha256": "ed5e76b945b7c7bc567a75d44a6eaeda137c767960121057deab52593e245d6e"
+    },
+    "GMAT_3_T": {
+      "bytes": 539915,
+      "sha256": "ed8ce2700e4af00421f7f8a663e4eb754da000bb19ac0d922cb2d02bc1a22f94"
+    },
+    "GRE_3_T": {
+      "bytes": 1155002,
+      "sha256": "728890a7e9e766c2a07c02b9c8ac638274cf04b096e15ed8cd6abc0723366e40"
+    },
+    "IELTS_3_T": {
+      "bytes": 676470,
+      "sha256": "63f64c79c96270f2a74f7bfebe952efe1d4c1f09b887bc3e4560a989b8873ad1"
+    },
+    "KaoYan_3_T": {
+      "bytes": 694848,
+      "sha256": "2997157b54912bb56118cf3153fb891c452fbfe813da8d21bb219ea7f2829090"
+    },
+    "SAT_3_T": {
+      "bytes": 795224,
+      "sha256": "801f17a1b63a0377dc331214e5af2900279c93b6baa8a828d6e639ae5db48310"
+    },
+    "TOEFL_3_T": {
+      "bytes": 814216,
+      "sha256": "a1209981905e8dacd3e52774ecc1157a6f5dd1417240a5ded08797c51a835d4c"
+    },
+    "itVocabulary": {
+      "bytes": 282128,
+      "sha256": "aa19e88f9c1095407a94e6547373ab4b4f0722eedd7a596384b9cc2943b2e4b6"
+    }
+  },
+  "qwerty_commit": "122acd9",
+  "schema_version": "leximeet.learning-sources.v1"
+}

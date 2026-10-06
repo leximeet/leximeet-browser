@@ -1,0 +1,438 @@
+{
+  "formatVersion": 1,
+  "base": {
+    "schemaVersion": 1,
+    "revision": "7",
+    "language": "en",
+    "length": null,
+    "allowedPos": null,
+    "allowedFamiliarity": null,
+    "excludedLexemes": [],
+    "posMode": "dictionary-possible",
+    "unknownPolicy": "review",
+    "normalizationVersion": "en-lexeme-1"
+  },
+  "cases": [
+    {
+      "name": "null_is_neutral",
+      "desktop": {
+        "schemaVersion": 1,
+        "revision": "7",
+        "language": "en",
+        "length": null,
+        "allowedPos": null,
+        "allowedFamiliarity": null,
+        "excludedLexemes": [],
+        "posMode": "dictionary-possible",
+        "unknownPolicy": "review",
+        "normalizationVersion": "en-lexeme-1"
+      },
+      "browser": {
+        "schemaVersion": 1,
+        "revision": "1",
+        "language": "en",
+        "length": null,
+        "allowedPos": [
+          "NOUN",
+          "VERB"
+        ],
+        "allowedFamiliarity": null,
+        "excludedLexemes": [],
+        "posMode": "dictionary-possible",
+        "unknownPolicy": "review",
+        "normalizationVersion": "en-lexeme-1"
+      },
+      "expected": {
+        "conflict": null,
+        "rules": {
+          "schemaVersion": 1,
+          "revision": "7",
+          "language": "en",
+          "length": null,
+          "allowedPos": [
+            "NOUN",
+            "VERB"
+          ],
+          "allowedFamiliarity": null,
+          "excludedLexemes": [],
+          "posMode": "dictionary-possible",
+          "unknownPolicy": "review",
+          "normalizationVersion": "en-lexeme-1"
+        }
+      }
+    },
+    {
+      "name": "empty_set_rejects_all",
+      "desktop": {
+        "schemaVersion": 1,
+        "revision": "7",
+        "language": "en",
+        "length": null,
+        "allowedPos": [],
+        "allowedFamiliarity": null,
+        "excludedLexemes": [],
+        "posMode": "dictionary-possible",
+        "unknownPolicy": "review",
+        "normalizationVersion": "en-lexeme-1"
+      },
+      "browser": {
+        "schemaVersion": 1,
+        "revision": "1",
+        "language": "en",
+        "length": null,
+        "allowedPos": [
+          "NOUN"
+        ],
+        "allowedFamiliarity": null,
+        "excludedLexemes": [],
+        "posMode": "dictionary-possible",
+        "unknownPolicy": "review",
+        "normalizationVersion": "en-lexeme-1"
+      },
+      "expected": {
+        "conflict": "RULE_CONFLICT",
+        "rules": null
+      }
+    },
+    {
+      "name": "all_dimensions_intersect",
+      "desktop": {
+        "schemaVersion": 1,
+        "revision": "7",
+        "language": "en",
+        "length": {
+          "min": 2,
+          "max": 12
+        },
+        "allowedPos": [
+          "NOUN",
+          "VERB"
+        ],
+        "allowedFamiliarity": [
+          "uncollected",
+          "learning"
+        ],
+        "excludedLexemes": [
+          "the",
+          "and"
+        ],
+        "posMode": "dictionary-possible",
+        "unknownPolicy": "review",
+        "normalizationVersion": "en-lexeme-1"
+      },
+      "browser": {
+        "schemaVersion": 1,
+        "revision": "1",
+        "language": "en",
+        "length": {
+          "min": 4,
+          "max": 9
+        },
+        "allowedPos": [
+          "VERB",
+          "ADJ"
+        ],
+        "allowedFamiliarity": [
+          "learning",
+          "mastered"
+        ],
+        "excludedLexemes": [
+          "and",
+          "get"
+        ],
+        "posMode": "dictionary-possible",
+        "unknownPolicy": "exclude",
+        "normalizationVersion": "en-lexeme-1"
+      },
+      "expected": {
+        "conflict": null,
+        "rules": {
+          "schemaVersion": 1,
+          "revision": "7",
+          "language": "en",
+          "length": {
+            "min": 4,
+            "max": 9
+          },
+          "allowedPos": [
+            "VERB"
+          ],
+          "allowedFamiliarity": [
+            "learning"
+          ],
+          "excludedLexemes": [
+            "and",
+            "get",
+            "the"
+          ],
+          "posMode": "dictionary-possible",
+          "unknownPolicy": "exclude",
+          "normalizationVersion": "en-lexeme-1"
+        }
+      }
+    },
+    {
+      "name": "length_conflict_never_relaxes",
+      "desktop": {
+        "schemaVersion": 1,
+        "revision": "7",
+        "language": "en",
+        "length": {
+          "min": 2,
+          "max": 3
+        },
+        "allowedPos": null,
+        "allowedFamiliarity": null,
+        "excludedLexemes": [],
+        "posMode": "dictionary-possible",
+        "unknownPolicy": "review",
+        "normalizationVersion": "en-lexeme-1"
+      },
+      "browser": {
+        "schemaVersion": 1,
+        "revision": "1",
+        "language": "en",
+        "length": {
+          "min": 5,
+          "max": 8
+        },
+        "allowedPos": null,
+        "allowedFamiliarity": null,
+        "excludedLexemes": [],
+        "posMode": "dictionary-possible",
+        "unknownPolicy": "review",
+        "normalizationVersion": "en-lexeme-1"
+      },
+      "expected": {
+        "conflict": "RULE_CONFLICT",
+        "rules": null
+      }
+    },
+    {
+      "name": "familiarity_empty_intersection",
+      "desktop": {
+        "schemaVersion": 1,
+        "revision": "7",
+        "language": "en",
+        "length": null,
+        "allowedPos": null,
+        "allowedFamiliarity": [
+          "mastered"
+        ],
+        "excludedLexemes": [],
+        "posMode": "dictionary-possible",
+        "unknownPolicy": "review",
+        "normalizationVersion": "en-lexeme-1"
+      },
+      "browser": {
+        "schemaVersion": 1,
+        "revision": "1",
+        "language": "en",
+        "length": null,
+        "allowedPos": null,
+        "allowedFamiliarity": [
+          "uncollected"
+        ],
+        "excludedLexemes": [],
+        "posMode": "dictionary-possible",
+        "unknownPolicy": "review",
+        "normalizationVersion": "en-lexeme-1"
+      },
+      "expected": {
+        "conflict": "RULE_CONFLICT",
+        "rules": null
+      }
+    }
+  ],
+  "evaluations": [
+    {
+      "name": "unknown_pos_unrestricted_allowed",
+      "rules": {
+        "schemaVersion": 1,
+        "revision": "7",
+        "language": "en",
+        "length": null,
+        "allowedPos": null,
+        "allowedFamiliarity": null,
+        "excludedLexemes": [],
+        "posMode": "dictionary-possible",
+        "unknownPolicy": "exclude",
+        "normalizationVersion": "en-lexeme-1"
+      },
+      "candidate": {
+        "word": "lexeme",
+        "possiblePos": [],
+        "familiarity": "uncollected"
+      },
+      "expectedStatus": "allowed"
+    },
+    {
+      "name": "unknown_pos_review",
+      "rules": {
+        "schemaVersion": 1,
+        "revision": "7",
+        "language": "en",
+        "length": null,
+        "allowedPos": [
+          "NOUN"
+        ],
+        "allowedFamiliarity": null,
+        "excludedLexemes": [],
+        "posMode": "dictionary-possible",
+        "unknownPolicy": "review",
+        "normalizationVersion": "en-lexeme-1"
+      },
+      "candidate": {
+        "word": "lexeme",
+        "possiblePos": [],
+        "familiarity": "uncollected"
+      },
+      "expectedStatus": "needsReview"
+    },
+    {
+      "name": "unknown_pos_exclude",
+      "rules": {
+        "schemaVersion": 1,
+        "revision": "7",
+        "language": "en",
+        "length": null,
+        "allowedPos": [
+          "NOUN"
+        ],
+        "allowedFamiliarity": null,
+        "excludedLexemes": [],
+        "posMode": "dictionary-possible",
+        "unknownPolicy": "exclude",
+        "normalizationVersion": "en-lexeme-1"
+      },
+      "candidate": {
+        "word": "lexeme",
+        "possiblePos": [],
+        "familiarity": "uncollected"
+      },
+      "expectedStatus": "rejected"
+    },
+    {
+      "name": "empty_pos_even_unknown_rejected",
+      "rules": {
+        "schemaVersion": 1,
+        "revision": "7",
+        "language": "en",
+        "length": null,
+        "allowedPos": [],
+        "allowedFamiliarity": null,
+        "excludedLexemes": [],
+        "posMode": "dictionary-possible",
+        "unknownPolicy": "review",
+        "normalizationVersion": "en-lexeme-1"
+      },
+      "candidate": {
+        "word": "lexeme",
+        "possiblePos": [],
+        "familiarity": "uncollected"
+      },
+      "expectedStatus": "rejected"
+    },
+    {
+      "name": "possible_pos_any_intersection",
+      "rules": {
+        "schemaVersion": 1,
+        "revision": "7",
+        "language": "en",
+        "length": null,
+        "allowedPos": [
+          "VERB"
+        ],
+        "allowedFamiliarity": null,
+        "excludedLexemes": [],
+        "posMode": "dictionary-possible",
+        "unknownPolicy": "review",
+        "normalizationVersion": "en-lexeme-1"
+      },
+      "candidate": {
+        "word": "book",
+        "possiblePos": [
+          "NOUN",
+          "VERB"
+        ],
+        "familiarity": "learning"
+      },
+      "expectedStatus": "allowed"
+    },
+    {
+      "name": "exclude_overrides_pos",
+      "rules": {
+        "schemaVersion": 1,
+        "revision": "7",
+        "language": "en",
+        "length": null,
+        "allowedPos": [
+          "VERB"
+        ],
+        "allowedFamiliarity": null,
+        "excludedLexemes": [
+          "book"
+        ],
+        "posMode": "dictionary-possible",
+        "unknownPolicy": "review",
+        "normalizationVersion": "en-lexeme-1"
+      },
+      "candidate": {
+        "word": "book",
+        "possiblePos": [
+          "NOUN",
+          "VERB"
+        ],
+        "familiarity": "learning"
+      },
+      "expectedStatus": "rejected"
+    },
+    {
+      "name": "length_counts_ascii_letters",
+      "rules": {
+        "schemaVersion": 1,
+        "revision": "7",
+        "language": "en",
+        "length": {
+          "min": 6,
+          "max": 6
+        },
+        "allowedPos": null,
+        "allowedFamiliarity": null,
+        "excludedLexemes": [],
+        "posMode": "dictionary-possible",
+        "unknownPolicy": "review",
+        "normalizationVersion": "en-lexeme-1"
+      },
+      "candidate": {
+        "word": "re-use",
+        "possiblePos": [],
+        "familiarity": "uncollected"
+      },
+      "expectedStatus": "rejected"
+    },
+    {
+      "name": "empty_familiarity_rejected",
+      "rules": {
+        "schemaVersion": 1,
+        "revision": "7",
+        "language": "en",
+        "length": null,
+        "allowedPos": null,
+        "allowedFamiliarity": [],
+        "excludedLexemes": [],
+        "posMode": "dictionary-possible",
+        "unknownPolicy": "review",
+        "normalizationVersion": "en-lexeme-1"
+      },
+      "candidate": {
+        "word": "book",
+        "possiblePos": [
+          "NOUN"
+        ],
+        "familiarity": "learning"
+      },
+      "expectedStatus": "rejected"
+    }
+  ]
+}

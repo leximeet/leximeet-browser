@@ -1,0 +1,9 @@
+flowchart LR
+  Range[冻结范围和当前词] --> Prepare[真实词典生成题目]
+  Prepare --> Freeze[(保存冻结题)]
+  Freeze --> View[完整题卡]
+  View --> Submit[答案与稳定提交 ID]
+  Submit --> Tx[判题和多表写事务]
+  Tx --> Receipt[积分与排程回执]
+  Receipt --> Wait[反馈一秒]
+  Wait --> Next[准备后完整切题]
