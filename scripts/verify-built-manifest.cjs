@@ -2,13 +2,19 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { createHash } = require("node:crypto");
-const { assertSingleExtensionManifest } = require("./lib/package-manifest.cjs");
+const {
+  assertSingleExtensionManifest,
+  assertNoEmbeddedArchives,
+} = require("./lib/package-manifest.cjs");
+const { parseBuildTarget } = require("./lib/build-target.cjs");
 
 // 检查实际交给浏览器安装的 manifest，避免只修改 package.json 却沿用旧构建。
 const root = path.resolve(__dirname, "..");
 const expected = require(path.join(root, "package.json")).version;
-const output = path.join(root, ".output/chrome-mv3");
+const browser = parseBuildTarget(process.argv.slice(2));
+const output = path.join(root, ".output", `${browser}-mv3`);
 assertSingleExtensionManifest(output);
+assertNoEmbeddedArchives(output);
 const manifestPath = path.join(output, "manifest.json");
 const actual = JSON.parse(fs.readFileSync(manifestPath, "utf8")).version;
 if (actual !== expected) {
@@ -56,13 +62,14 @@ if (manifest.web_accessible_resources || manifest.action.default_popup)
   throw new Error("不应暴露私人页面资源或配置 popup");
 const dictionary = JSON.parse(
   fs.readFileSync(
-    path.join(root, ".output/chrome-mv3/dictionaries/core/dictionary-manifest.json"),
+    path.join(output, "dictionaries/core/dictionary-manifest.json"),
     "utf8",
   ),
 );
 const lock = require(path.join(root, "dictionary-text.lock.json"));
 if (
   dictionary.schema !== "leximeet.browser-text.v3" ||
+  dictionary.generatorRevision !== 3 ||
   dictionary.sourceReleaseSha256 !== lock.releaseSha256 ||
   dictionary.entryCount !== lock.entryCount ||
   dictionary.audioCount !== 0 ||
@@ -72,7 +79,7 @@ if (
   throw new Error("构建产物没有包含锁定的 LexiMeet Dictionary core");
 }
 const declaration = JSON.parse(
-  fs.readFileSync(path.join(root, ".output/chrome-mv3/lmcp-readiness.json"), "utf8"),
+  fs.readFileSync(path.join(output, "lmcp-readiness.json"), "utf8"),
 );
 const contract = require(path.join(root, "lib/connector/contracts/contract.json"));
 if (
@@ -88,7 +95,7 @@ const sourceNotices = fs.readFileSync(
   "utf8",
 );
 const builtNotices = fs.readFileSync(
-  path.join(root, ".output/chrome-mv3/THIRD_PARTY_NOTICES.txt"),
+  path.join(output, "THIRD_PARTY_NOTICES.txt"),
   "utf8",
 );
 if (builtNotices !== sourceNotices) throw new Error("随包第三方通知缺失或与源码不一致");
@@ -127,7 +134,7 @@ for (const copyright of [
   if (hash !== "fe2a9817987f862eaced948f0468c7f51d2fedfc48c5c505b246a49a3870e9a5")
     throw new Error(`MIT 授权正文不完整或被修改：${copyright}`);
 }
-console.log(`扩展安装清单版本：${actual}；生产目录仅有根 manifest.json`);
+console.log(`${browser} 扩展安装清单版本：${actual}；生产目录仅有根 manifest.json`);
 console.log(
   `内置词典：${dictionary.entryCount} 条词卡 / ${dictionary.audioCount} 段内置音频（在线朗读）`,
 );

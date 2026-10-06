@@ -45,7 +45,7 @@ npm run lab:browser
 
 首次启动会打开包内教学，并另开 Node.js 英文文档；外网访问失败时，会改用本地示例文章。关闭浏览器或按 Ctrl+C 会清理本轮资料。若只使用本地页：`LEXIMEET_LAB_URL=local npm run lab:browser`。
 
-长期使用时，可运行`npm run build`，在 Chrome 扩展管理页加载`.output/chrome-mv3/`，资料会保存在你自己的浏览器中。临时 lab 的资料会在退出时清理，请勿用它长期保存资料。
+长期使用时，可运行`npm run build`，在 Chrome 扩展管理页加载`.output/chrome-mv3/`；Edge 使用`npm run build:edge`和`.output/edge-mv3/`。资料会保存在你自己的浏览器中。临时 lab 的资料会在退出时清理，请勿用它长期保存资料。
 
 ## 连接Desktop
 
@@ -80,7 +80,9 @@ flowchart LR
 npm run format:check
 npm run verify          # 类型、单元、构建、清单及完整无头独立UI
 npm run test:connected  # 真实Native / Desktop / Core
-npm run zip             # 仅生成本地ZIP
+npm run zip            # 生成本地 Chrome ZIP
+npm run zip:edge       # 生成本地 Edge ZIP
+npm run verify:store-packages # 核验两份 ZIP 和同一生产字节
 ```
 
 所有自动回归均使用独占 profile，默认无界面，不操作系统键鼠，也不重试。协议、词包、共享向量和依赖均已锁定。模型、源码 UI、应用包、系统横幅和远端 Actions 的验证范围各不相同，不能相互替代。[测试设计](docs/测试与验收.md) · [发布清单](docs/发布指南.md)

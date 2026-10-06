@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 构建期把固定 Lite Text 分成 gzip 小片。保留全部词条字段与原始来源，不附带录音。
+// 构建期把固定 Lite Text 分成普通 JSON/JSONL 小片，由外层安装 ZIP 统一压缩。保留全部词条字段与原始来源，不附带录音。
 import { createReadStream } from "node:fs";
 import {
   readFile,
@@ -12,9 +12,9 @@ import {
   mkdtemp,
 } from "node:fs/promises";
 import { createHash } from "node:crypto";
-import { gzipSync } from "node:zlib";
 import { resolve, join } from "node:path";
 import { Decompress } from "fzstd";
+import { assertNoEmbeddedArchives } from "./lib/package-manifest.cjs";
 const root = resolve(import.meta.dirname, "..");
 const lock = JSON.parse(await readFile(join(root, "dictionary-text.lock.json")));
 let source = resolve(
@@ -24,7 +24,7 @@ let source = resolve(
 const output = join(root, "public/dictionaries/core");
 // 词典数据清单使用独立文件名，避免商店将它识别成第二个扩展安装清单。
 const manifestName = "dictionary-manifest.json";
-const generatorRevision = 2;
+const generatorRevision = 3;
 const sha = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const asset = (name, bytes, count) => ({
   file: name,
@@ -52,6 +52,7 @@ if (
   throw new Error("文字包合同不符");
 try {
   const manifest = JSON.parse(await readFile(join(output, manifestName)));
+  assertNoEmbeddedArchives(output);
   const assets = [
     ...Object.values(manifest.entries),
     ...Object.values(manifest.forms),
@@ -191,12 +192,8 @@ try {
   for (const kind of ["entries", "forms"]) {
     sections[kind] = {};
     for (const name of (await readdir(join(stage, kind))).sort()) {
-      const bytes = gzipSync(await readFile(join(stage, kind, name)), {
-        level: 6,
-      });
-      const path = `${kind}/${name}.gz`;
-      await writeFile(join(stage, path), bytes);
-      await rm(join(stage, kind, name));
+      const path = `${kind}/${name}`;
+      const bytes = await readFile(join(stage, path));
       sections[kind][name.slice(0, 2)] = asset(
         path,
         bytes,
@@ -217,8 +214,8 @@ try {
       m.sourcePosition = m.position;
       m.position = i + 1;
     });
-    const name = `catalogs/${String(i).padStart(2, "0")}.json.gz`;
-    const bytes = gzipSync(JSON.stringify(members));
+    const name = `catalogs/${String(i).padStart(2, "0")}.json`;
+    const bytes = Buffer.from(JSON.stringify(members), "utf8");
     await writeFile(join(stage, name), bytes);
     catalogMembers[c.catalog_id] = asset(name, bytes, members.length);
     catalogIndex.push({
@@ -233,8 +230,8 @@ try {
   }
   const indexBytes = Buffer.from(JSON.stringify(catalogIndex));
   await writeFile(join(stage, "catalogs/index.json"), indexBytes);
-  const all = gzipSync(JSON.stringify(heads));
-  await writeFile(join(stage, "catalogs/all.json.gz"), all);
+  const all = Buffer.from(JSON.stringify(heads), "utf8");
+  await writeFile(join(stage, "catalogs/all.json"), all);
   const notices = [];
   for (const name of [
     "release.json",
@@ -258,12 +255,13 @@ try {
     catalogCount: catalogIndex.length,
     catalogIndex: asset("catalogs/index.json", indexBytes, catalogIndex.length),
     catalogMembers,
-    allMembers: asset("catalogs/all.json.gz", all, heads.length),
+    allMembers: asset("catalogs/all.json", all, heads.length),
     casefoldOverrides: overrides,
     ...sections,
     notices,
   };
   await writeFile(join(stage, manifestName), JSON.stringify(manifest) + "\n");
+  assertNoEmbeddedArchives(stage);
   // 只替换本脚本管理的生成目录；原词包保存在 previous，直到新产物完整落位。
   let previous;
   try {

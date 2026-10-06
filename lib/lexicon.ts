@@ -122,7 +122,7 @@ export type LexiconEntry = {
 
 // 内容提供者可替换；词条、遇见、复习只依赖个人资料 ID，不依赖词包行号。
 export interface LexiconProvider {
-  // 正文匹配只需要原词头；不应为了每个候选词解压完整释义分片。
+  // 正文匹配只需要原词头；不应为了每个候选词解析完整释义分片。
   resolveHeadword(word: string): Promise<string | null>;
   lookup(word: string): Promise<LexiconEntry | null>;
   lookupAll(word: string): Promise<LexiconEntry[]>;
@@ -136,6 +136,7 @@ export interface LexiconProvider {
 type Asset = { file: string; entries?: number; bytes: number; sha256: string };
 type CoreManifest = {
   schema: "leximeet.browser-text.v3";
+  generatorRevision: 3;
   dictionaryVersion: "0.0.3";
   entrySchema: "leximeet.entry.v2";
   sourceEdition: "lite-text";
@@ -195,7 +196,7 @@ function headwordMeaning(entry: CoreEntry): string {
   );
 }
 
-// 只读 Lite Text 按需解压；Core 的已核验增量由独立缓存提供。
+// 只读 Lite Text 按需读取明文分片；Core 的已核验增量由独立缓存提供。
 export class CoreLexiconProvider implements LexiconProvider {
   private manifestPromise?: Promise<CoreManifest>;
   private readonly cache = new Map<string, unknown>();
@@ -218,6 +219,7 @@ export class CoreLexiconProvider implements LexiconProvider {
       const manifest = (await response.json()) as CoreManifest;
       if (
         manifest.schema !== "leximeet.browser-text.v3" ||
+        manifest.generatorRevision !== 3 ||
         manifest.dictionaryVersion !== "0.0.3" ||
         manifest.entrySchema !== "leximeet.entry.v2" ||
         manifest.sourceEdition !== "lite-text" ||
@@ -237,7 +239,7 @@ export class CoreLexiconProvider implements LexiconProvider {
 
   private async bytes(asset: Asset): Promise<ArrayBuffer> {
     if (
-      !/^(?:(?:entries|forms)\/[a-z_]{2}|audio-index\/[0-9a-f]{2})\.jsonl\.gz$|^audio\/\d{4}\.bin$|^catalogs\/(?:index\.json|(?:\d{2}|all)\.json\.gz)$/.test(
+      !/^(?:(?:entries|forms)\/[a-z_]{2}\.jsonl|catalogs\/(?:index|\d{2}|all)\.json)$(?![\s\S])/.test(
         asset.file,
       )
     )
@@ -253,12 +255,13 @@ export class CoreLexiconProvider implements LexiconProvider {
     return bytes;
   }
 
+  // 先核对原始 UTF-8 字节，再解析；损坏编码不能被替换字符静默掩盖。
+  private async text(asset: Asset): Promise<string> {
+    return new TextDecoder("utf-8", { fatal: true }).decode(await this.bytes(asset));
+  }
+
   private async lines(asset: Asset): Promise<string[]> {
-    const compressed = await this.bytes(asset);
-    const stream = new Blob([compressed])
-      .stream()
-      .pipeThrough(new DecompressionStream("gzip"));
-    const content = await new Response(stream).text();
+    const content = await this.text(asset);
     const rows = content.trimEnd().split("\n");
     if (rows.length !== asset.entries)
       throw new Error(`核心词包分片条数不符：${asset.file}`);
@@ -436,9 +439,7 @@ export class CoreLexiconProvider implements LexiconProvider {
   async listCatalogs(): Promise<CoreCatalog[]> {
     const manifest = await this.manifest();
     return this.cached("catalog:index", async () => {
-      const rows = JSON.parse(
-        new TextDecoder().decode(await this.bytes(manifest.catalogIndex)),
-      ) as CoreCatalog[];
+      const rows = JSON.parse(await this.text(manifest.catalogIndex)) as CoreCatalog[];
       if (
         rows.length !== manifest.catalogCount ||
         new Set(rows.map((row) => row.id)).size !== rows.length ||
@@ -465,11 +466,7 @@ export class CoreLexiconProvider implements LexiconProvider {
     )
       throw new Error("学习目录不存在");
     return this.cached(`catalog:${catalogId}`, async () => {
-      const data = await this.bytes(asset);
-      const plain = new Blob([data])
-        .stream()
-        .pipeThrough(new DecompressionStream("gzip"));
-      const members = JSON.parse(await new Response(plain).text()) as CatalogMember[];
+      const members = JSON.parse(await this.text(asset)) as CatalogMember[];
       if (
         members.length !== asset.entries ||
         members.some(
@@ -492,13 +489,7 @@ export class CoreLexiconProvider implements LexiconProvider {
   private liteMembers(): Promise<CatalogMember[]> {
     return (this.liteMemberPromise ??= (async () => {
       const manifest = await this.manifest();
-      const lite = JSON.parse(
-        await new Response(
-          new Blob([await this.bytes(manifest.allMembers)])
-            .stream()
-            .pipeThrough(new DecompressionStream("gzip")),
-        ).text(),
-      ) as CatalogMember[];
+      const lite = JSON.parse(await this.text(manifest.allMembers)) as CatalogMember[];
       if (lite.length !== 26417 || new Set(lite.map((m) => m.entryId)).size !== 26417)
         throw new Error("内置词典成员不完整");
       return lite;

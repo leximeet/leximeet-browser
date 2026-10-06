@@ -3,6 +3,7 @@ import "fake-indexeddb/auto";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { resolve } from "node:path";
 import { CoreLexiconProvider } from "../lib/lexicon.ts";
 
@@ -10,7 +11,7 @@ const root = resolve("public/dictionaries/core");
 const fetchLocal: typeof fetch = async (url) => {
   const name = String(url).replace("local://core/", "");
   if (
-    !/^(dictionary-manifest\.json|(?:entries|forms)\/[a-z_]{2}\.jsonl\.gz|audio-index\/[0-9a-f]{2}\.jsonl\.gz|audio\/\d{4}\.bin|catalogs\/(?:index\.json|(?:\d{2}|all)\.json\.gz))$/.test(
+    !/^(dictionary-manifest\.json|(?:entries|forms)\/[a-z_]{2}\.jsonl|catalogs\/(?:index|\d{2}|all)\.json)$/.test(
       name,
     )
   )
@@ -43,7 +44,7 @@ test("首次冷正文通过词头与词形匹配，不读取释义分片，保�
   const headFetch: typeof fetch = async (url) => {
     const name = String(url).replace("local://core/", "");
     requested.push(name);
-    assert.equal(name.startsWith("entries/"), false, "正文候选匹配不得解压完整释义分片");
+    assert.equal(name.startsWith("entries/"), false, "正文候选匹配不得解析完整释义分片");
     return fetchLocal(url);
   };
   // 新提供者与空缓存模拟首次扫描，而不是靠前一遍完整词卡读取暖缓存。
@@ -67,7 +68,7 @@ test("首次冷正文通过词头与词形匹配，不读取释义分片，保�
     );
   assert.equal(requested.filter((name) => name === "dictionary-manifest.json").length, 1);
   assert.equal(requested.includes("manifest.json"), false);
-  assert.equal(requested.filter((name) => name === "catalogs/all.json.gz").length, 1);
+  assert.equal(requested.filter((name) => name === "catalogs/all.json").length, 1);
 });
 
 test("真实目录按发布包词序读取，区分考试与专业并保持词条 ID", async () => {
@@ -100,7 +101,7 @@ test("真实目录按发布包词序读取，区分考试与专业并保持词�
 
 test("损坏词卡和目录分片按哈希拒绝，不能显示伪内容或播放错误字节", async () => {
   const corruptEntry: typeof fetch = async (url) =>
-    String(url).endsWith("entries/re.jsonl.gz")
+    String(url).endsWith("entries/re.jsonl")
       ? new Response(new Uint8Array([1, 2, 3]))
       : fetchLocal(url);
   await assert.rejects(
@@ -108,7 +109,7 @@ test("损坏词卡和目录分片按哈希拒绝，不能显示伪内容或播�
     /校验失败/,
   );
   const corruptCatalog: typeof fetch = async (url) =>
-    /catalogs\/\d{2}\.json\.gz$/.test(String(url))
+    /catalogs\/\d{2}\.json$/.test(String(url))
       ? new Response(new Uint8Array([1, 2, 3]))
       : fetchLocal(url);
   await assert.rejects(
@@ -159,4 +160,89 @@ test("连续选义确定性轮换真实干扰项，不重复固定前三义且�
       pool.find((e) => e.entryId === c.id)?.possiblePos[0],
       own.possiblePos[0],
     );
+});
+
+test("明文词包拒绝旧压缩布局与越界资产路径，不能额外读取页面或录音", async () => {
+  const source = JSON.parse(
+    await readFile(resolve(root, "dictionary-manifest.json"), "utf8"),
+  );
+  for (const file of [
+    "entries/re.jsonl.gz",
+    "../entries/re.jsonl",
+    "https://example.com/re.jsonl",
+    "entries/re.jsonl?download=1",
+    "entries/re.jsonl#part",
+    "audio/0000.bin",
+    "audio-index/00.jsonl",
+    "entries/re.jsonl\n",
+  ]) {
+    const manifest = structuredClone(source);
+    manifest.entries.re.file = file;
+    const requests: string[] = [];
+    const guardedFetch: typeof fetch = async (url) => {
+      requests.push(String(url));
+      return String(url).endsWith("dictionary-manifest.json")
+        ? Response.json(manifest)
+        : fetchLocal(url);
+    };
+    await assert.rejects(
+      new CoreLexiconProvider("local://core/", guardedFetch).lookup("resilient"),
+      /资产路径无效/,
+    );
+    assert.deepEqual(requests, ["local://core/dictionary-manifest.json"]);
+  }
+  source.generatorRevision = 2;
+  const oldFetch: typeof fetch = async (url) =>
+    String(url).endsWith("dictionary-manifest.json")
+      ? Response.json(source)
+      : fetchLocal(url);
+  await assert.rejects(
+    new CoreLexiconProvider("local://core/", oldFetch).lookup("resilient"),
+    /版本或来源不受支持/,
+  );
+});
+
+test("明文词典保留逐片条数检查和严格 UTF-8，校验正确也不接受损坏编码", async () => {
+  const source = JSON.parse(
+    await readFile(resolve(root, "dictionary-manifest.json"), "utf8"),
+  );
+  const badCount = structuredClone(source);
+  badCount.entries.re.entries += 1;
+  const countedFetch: typeof fetch = async (url) =>
+    String(url).endsWith("dictionary-manifest.json")
+      ? Response.json(badCount)
+      : fetchLocal(url);
+  await assert.rejects(
+    new CoreLexiconProvider("local://core/", countedFetch).lookup("resilient"),
+    /分片条数不符/,
+  );
+
+  const invalidUtf8 = new Uint8Array([0xff]);
+  source.entries.re.bytes = invalidUtf8.length;
+  source.entries.re.sha256 = createHash("sha256").update(invalidUtf8).digest("hex");
+  source.entries.re.entries = 1;
+  const encodingFetch: typeof fetch = async (url) =>
+    String(url).endsWith("dictionary-manifest.json")
+      ? Response.json(source)
+      : String(url).endsWith("entries/re.jsonl")
+        ? new Response(invalidUtf8)
+        : fetchLocal(url);
+  await assert.rejects(
+    new CoreLexiconProvider("local://core/", encodingFetch).lookup("resilient"),
+    /encoded data|encoding/i,
+  );
+});
+
+test("全部 23 份明文学习目录均保留顺序、中文释义和原始词条身份", async () => {
+  const dictionary = new CoreLexiconProvider("local://core/", fetchLocal);
+  for (const catalog of await dictionary.listCatalogs()) {
+    const members = await dictionary.catalogMembers(catalog.id);
+    assert.equal(members.length, catalog.count);
+    assert.equal(new Set(members.map((member) => member.entryId)).size, members.length);
+    assert.ok(
+      members.some((member) => /[\u3400-\u9fff]/u.test(member.meaning)),
+      catalog.id,
+    );
+    assert.ok(members.every((member, index) => member.position === index + 1));
+  }
 });

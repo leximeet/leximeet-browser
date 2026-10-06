@@ -2,15 +2,12 @@ import "fake-indexeddb/auto";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { gunzipSync } from "node:zlib";
 import { DictionaryCache, CORE_PACKAGE, idbRequest } from "../lib/dictionary-cache.ts";
 import type { CoreEntry } from "../lib/lexicon.ts";
 
 async function sampleEntry() {
   // 使用正式 v2 样例，并补充未来字段，验证缓存不会丢掉词卡的嵌套信息。
-  const text = gunzipSync(
-    await readFile("public/dictionaries/core/entries/re.jsonl.gz"),
-  ).toString("utf8");
+  const text = await readFile("public/dictionaries/core/entries/re.jsonl", "utf8");
   const entry = text
     .split("\n")
     .filter(Boolean)

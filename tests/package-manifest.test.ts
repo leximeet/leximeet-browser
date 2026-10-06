@@ -3,7 +3,10 @@ import assert from "node:assert/strict";
 import { mkdtempSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { assertSingleExtensionManifest } from "../scripts/lib/package-manifest.cjs";
+import {
+  assertSingleExtensionManifest,
+  assertNoEmbeddedArchives,
+} from "../scripts/lib/package-manifest.cjs";
 
 function packageFixture(t: TestContext, files: string[]) {
   const directory = mkdtempSync(join(tmpdir(), "leximeet-package-manifest-"));
@@ -60,4 +63,65 @@ test("生产包符号链接不能绕过递归清单核验", (t) => {
   const directory = packageFixture(t, ["manifest.json", "assets/data.json"]);
   symlinkSync("data.json", join(directory, "assets/link.json"));
   assert.throws(() => assertSingleExtensionManifest(directory), /符号链接/);
+});
+
+test("正式包允许明文词典及正常图片、音效", (t) => {
+  const directory = packageFixture(t, [
+    "manifest.json",
+    "dictionaries/core/entries/re.jsonl",
+    "dictionaries/core/catalogs/all.json",
+    "assets/icon.png",
+    "assets/success.wav",
+  ]);
+  assert.doesNotThrow(() => assertNoEmbeddedArchives(directory));
+});
+
+test("正式包递归拒绝压缩档案后缀，不能把历史缓存带入商店", (t) => {
+  for (const extension of [
+    "gz",
+    "GZ",
+    "zip",
+    "tgz",
+    "bz2",
+    "xz",
+    "zst",
+    "br",
+    "7z",
+    "rar",
+    "tar",
+    "lzma",
+  ]) {
+    const directory = packageFixture(t, [
+      "manifest.json",
+      `dictionaries/core/nested/data.${extension}`,
+    ]);
+    assert.throws(() => assertNoEmbeddedArchives(directory), /禁止内嵌压缩档案/);
+  }
+});
+
+test("压缩档案改成数据文件后缀仍按文件头拒绝", (t) => {
+  const signatures = [
+    "1f8b0800",
+    "504b0304",
+    "504b0506",
+    "504b0708",
+    "425a68",
+    "fd377a585a00",
+    "28b52ffd",
+    "502a4d18",
+    "5f2a4d18",
+    "377abcaf271c",
+    "526172211a0700",
+    "4c5a4950",
+  ];
+  for (const signature of signatures) {
+    const directory = packageFixture(t, ["manifest.json", "data.json"]);
+    writeFileSync(join(directory, "data.json"), Buffer.from(signature, "hex"));
+    assert.throws(() => assertNoEmbeddedArchives(directory), /文件头是压缩档案/);
+  }
+  const directory = packageFixture(t, ["manifest.json", "data.json"]);
+  const tar = Buffer.alloc(512);
+  tar.write("ustar", 257);
+  writeFileSync(join(directory, "data.json"), tar);
+  assert.throws(() => assertNoEmbeddedArchives(directory), /文件头是压缩档案/);
 });

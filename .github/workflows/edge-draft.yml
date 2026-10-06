@@ -1,0 +1,95 @@
+name: Upload Edge draft package
+on:
+  workflow_dispatch:
+    inputs:
+      ci_run_id:
+        description: "成功的 main 独立 CI run ID（不是 URL）"
+        required: true
+        type: string
+      connected_run_id:
+        description: "同一源码通过真实 Desktop 连接的 run ID"
+        required: true
+        type: string
+      source_sha:
+        description: "该 CI 验证的完整 40 位源码提交 SHA"
+        required: true
+        type: string
+      published_product:
+        description: "此产品已在 Edge 首次发布；本次只更新草稿包"
+        required: true
+        default: false
+        type: boolean
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: edge-store-draft
+  cancel-in-progress: false
+jobs:
+  upload:
+    if: github.ref == 'refs/heads/main' && inputs.published_product
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: edge-store
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+      - name: 下载同仓 main 成功 CI 的已验收产物
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          CI_RUN_ID: ${{ inputs.ci_run_id }}
+          CONNECTED_RUN_ID: ${{ inputs.connected_run_id }}
+          EXPECTED_SHA: ${{ inputs.source_sha }}
+        run: |
+          node --input-type=module <<'JS'
+          if (![process.env.CI_RUN_ID, process.env.CONNECTED_RUN_ID].every((value) => /^[1-9][0-9]*$/.test(value)) || !/^[0-9a-f]{40}$/.test(process.env.EXPECTED_SHA)) throw new Error('请输入 run ID 与完整源码 SHA');
+          JS
+          gh api "repos/$GH_REPO/actions/runs/$CI_RUN_ID" > "$RUNNER_TEMP/edge-source-run.json"
+          gh api "repos/$GH_REPO/actions/runs/$CONNECTED_RUN_ID" > "$RUNNER_TEMP/edge-connected-run.json"
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          for (const [file, id, path, events] of [
+            ['edge-source-run.json', process.env.CI_RUN_ID, '.github/workflows/ci.yml', ['push', 'workflow_dispatch']],
+            ['edge-connected-run.json', process.env.CONNECTED_RUN_ID, '.github/workflows/connected.yml', ['workflow_dispatch']],
+          ]) {
+            const run = JSON.parse(fs.readFileSync(`${process.env.RUNNER_TEMP}/${file}`, 'utf8'));
+            if (String(run.id) !== id || run.path !== path || run.status !== 'completed' || run.conclusion !== 'success' || !events.includes(run.event) || run.head_branch !== 'main' || run.head_sha !== process.env.EXPECTED_SHA || run.head_repository?.full_name !== process.env.GH_REPO || run.repository?.full_name !== process.env.GH_REPO) throw new Error('要求本仓 main 同一源码的独立与连接 CI 均通过；不接收 PR、标签或其他工作流产物');
+          }
+          JS
+          gh run download "$CI_RUN_ID" --repo "$GH_REPO" --name browser-store-packages --dir "$RUNNER_TEMP/edge-store-packages"
+      - name: 核验来源与安装包摘要
+        id: package
+        env:
+          EXPECTED_SHA: ${{ inputs.source_sha }}
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+          const directory = `${process.env.RUNNER_TEMP}/edge-store-packages`;
+          const source = JSON.parse(fs.readFileSync(`${directory}/store-packages.json`, 'utf8'));
+          // 字段与 verify:store-packages 同源；不执行下载产物中的任何脚本。
+          if (source.sourceCommit !== process.env.EXPECTED_SHA || source.sourceDirty !== false || source.equivalence !== true) throw new Error('产物未绑定到干净源码与等价生产包');
+          const edge = source.packages?.edge;
+          if (!/^[0-9]+\.[0-9]+\.[0-9]+$/.test(source.version) || edge?.file !== `leximeet-browser-${source.version}-edge.zip` || !/^[0-9a-f]{64}$/.test(edge.sha256)) throw new Error('Edge 产物声明无效');
+          const file = `${directory}/${edge.file}`;
+          const bytes = fs.readFileSync(file);
+          if (bytes.length !== edge.bytes || crypto.createHash('sha256').update(bytes).digest('hex') !== edge.sha256) throw new Error('Edge 安装包摘要或大小不同');
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `path=${file}\nsha256=${edge.sha256}\n`);
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `来源提交：${source.sourceCommit}\n\nEdge ZIP：${edge.file}\n\nSHA-256：${edge.sha256}\n\n`);
+          JS
+      # 只有这个步骤读取商店密钥；脚本不提供发布接口，也不自动重复上传。
+      - name: 上传并等待 Edge 草稿包处理完成
+        env:
+          EDGE_CLIENT_ID: ${{ secrets.EDGE_CLIENT_ID }}
+          EDGE_API_KEY: ${{ secrets.EDGE_API_KEY }}
+          EDGE_PRODUCT_ID: ${{ vars.EDGE_PRODUCT_ID }}
+          PACKAGE_PATH: ${{ steps.package.outputs.path }}
+          PACKAGE_SHA256: ${{ steps.package.outputs.sha256 }}
+        run: |
+          node scripts/upload-edge-draft.mjs "$PACKAGE_PATH" "$PACKAGE_SHA256"
+          printf '草稿安装包已处理成功。请到 Partner Center 核对资料，由维护者手动提交审核。此工作流没有发布。\n' >> "$GITHUB_STEP_SUMMARY"

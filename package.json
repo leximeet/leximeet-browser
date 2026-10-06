@@ -35,7 +35,13 @@
     "test:upgrade": "playwright test --config playwright.upgrade.config.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "docs:check": "node scripts/check-docs.mjs"
+    "docs:check": "node scripts/check-docs.mjs",
+    "prebuild:edge": "npm run prepare:dictionary && npm run prepare:connector",
+    "build:edge": "wxt build -b edge --mv3",
+    "prezip:edge": "npm run prepare:dictionary && npm run prepare:connector",
+    "zip:edge": "wxt zip -b edge --mv3",
+    "verify:manifest:edge": "node scripts/verify-built-manifest.cjs --browser edge",
+    "verify:store-packages": "python3 scripts/verify-store-packages.py"
   },
   "dependencies": {
     "fzstd": "0.1.1",

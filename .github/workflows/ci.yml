@@ -42,8 +42,31 @@ jobs:
           path: ${{ env.LEXIMEET_DICTIONARY_RELEASE_DIR }}
           key: dictionary-v0.0.3-text-${{ hashFiles('dictionary-text.lock.json') }}
       - run: npx playwright install chromium
-      - name: 格式、类型、单元、正式构建、清单与完整无头UI
-        run: npm run verify
+      - name: 格式、文档、合同、类型与完整单元
+        run: npm run format:check && npm run docs:check && npm run verify:connector && npm run typecheck && npm test
+      - name: 构建 Chrome 与 Edge 安装包并校验相同生产字节
+        run: |
+          npm run zip
+          npm run zip:edge
+          npm run verify:manifest
+          npm run verify:manifest:edge
+          npm run verify:store-packages
+      # 完整套件使用刚才的原样 Chrome 生产目录；两端字节相同不冒称正式 Edge 实测。
+      - name: 完整独立 Chromium 无头 UI
+        run: npm run test:browser
+      - name: 确认测试后 ZIP 与生产字节仍然一致
+        run: npm run verify:store-packages
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: browser-store-packages
+          path: |
+            .output/leximeet-browser-*-chrome.zip
+            .output/leximeet-browser-*-edge.zip
+            .output/store-packages.json
+            .output/SHA256SUMS
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: always()
         with:
