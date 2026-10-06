@@ -54,8 +54,17 @@ for (const pinFirst of [true, false])
             (await (globalThis as any).chrome.action.getUserSettings()).isOnToolbar,
         ),
       ).toBe(false);
-      // 真实 Chrome WebUI 开关，不能伪造图钉状态。默认教学优先提示浏览器拼图菜单。
-      await details.getByRole("button", { name: "固定到工具栏", exact: true }).click();
+      // locale 只控制网页环境，Chrome WebUI 仍可能使用 runner 的系统语言。
+      // 用固定版本 Chromium 的真实开关 ID 定位，再核对 Chrome 的图钉事实。
+      await details.locator("extensions-toggle-row#pin-to-toolbar cr-toggle").click();
+      await expect
+        .poll(() =>
+          extension.worker.evaluate(
+            async () =>
+              (await (globalThis as any).chrome.action.getUserSettings()).isOnToolbar,
+          ),
+        )
+        .toBe(true);
       await expect(coach).toHaveAttribute("data-step", "panel");
       expect(await contexts()).toHaveLength(0);
       await details.close();

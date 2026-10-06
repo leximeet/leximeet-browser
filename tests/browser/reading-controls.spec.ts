@@ -223,6 +223,8 @@ test("悬浮球开关：旋转忙碌、再次点击静默取消、连续切换�
     ).toHaveLength(1);
     await closeNativePanel(panel);
     await expect(ball).toBeVisible();
+    // 原生文档销毁与网页收到关闭投影是两个异步步骤；按已显示的打开动作继续。
+    await expect(ball).toHaveAttribute("aria-label", /右键打开侧栏$/);
     await ball.focus();
     await reading.keyboard.press("Shift+F10");
     panel = await nativePanel(extension.context);
