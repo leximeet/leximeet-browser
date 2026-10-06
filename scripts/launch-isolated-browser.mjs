@@ -51,7 +51,10 @@ export async function startIsolatedBrowser({
   )
     throw new Error("请先运行 npm run build，并核对 1.0.0 manifest");
   const dictionary = JSON.parse(
-    await readFile(join(extensionDir, "dictionaries/core/manifest.json"), "utf8"),
+    await readFile(
+      join(extensionDir, "dictionaries/core/dictionary-manifest.json"),
+      "utf8",
+    ),
   );
   if (
     dictionary.schema !== "leximeet.browser-text.v3" ||

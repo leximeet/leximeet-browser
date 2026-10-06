@@ -31,6 +31,7 @@ export interface ConnectionUi {
   ): Promise<{ words: DesktopWord[] }>;
   prepareDesktopSettings(lab: ConnectedLabSession): Promise<void>;
   discoveredNotification(lab: ConnectedLabSession): Promise<boolean>;
+  waitForDiscoveryNotification(lab: ConnectedLabSession): Promise<void>;
   invitationPopup(lab: ConnectedLabSession): Promise<Page>;
   requestInvitation(
     lab: ConnectedLabSession,

@@ -521,6 +521,8 @@ export async function startConnectedLab({
     fs.chmodSync(browserProfile, 0o700);
     process.env.PW_CHROMIUM_ATTACH_TO_OTHER = "1";
     const proxy = readingUrl === "local" ? null : await labProxy();
+    // 发现预算从首次真实浏览器启动前计时；环境准备不占用窗口，重启也不重置截止。
+    evidence.discoveryStartedAt ??= new Date().toISOString();
     context = await chromium.launchPersistentContext(browserProfile, {
       channel: "chromium",
       headless,

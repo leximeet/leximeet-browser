@@ -67,8 +67,8 @@ export default defineBackground(() => {
     library: browserLibrary,
     lexicon: new CoreLexiconProvider(
       browser.runtime
-        .getURL("/dictionaries/core/manifest.json")
-        .replace(/manifest\.json$/, ""),
+        .getURL("/dictionaries/core/dictionary-manifest.json")
+        .replace(/dictionary-manifest\.json$/, ""),
     ),
   });
   const { library: localLibrary, lexicon } = services;

@@ -2,11 +2,14 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { createHash } = require("node:crypto");
+const { assertSingleExtensionManifest } = require("./lib/package-manifest.cjs");
 
 // 检查实际交给浏览器安装的 manifest，避免只修改 package.json 却沿用旧构建。
 const root = path.resolve(__dirname, "..");
 const expected = require(path.join(root, "package.json")).version;
-const manifestPath = path.join(root, ".output/chrome-mv3/manifest.json");
+const output = path.join(root, ".output/chrome-mv3");
+assertSingleExtensionManifest(output);
+const manifestPath = path.join(output, "manifest.json");
 const actual = JSON.parse(fs.readFileSync(manifestPath, "utf8")).version;
 if (actual !== expected) {
   throw new Error(`扩展安装清单版本不一致：源码 ${expected}，构建 ${actual}`);
@@ -53,7 +56,7 @@ if (manifest.web_accessible_resources || manifest.action.default_popup)
   throw new Error("不应暴露私人页面资源或配置 popup");
 const dictionary = JSON.parse(
   fs.readFileSync(
-    path.join(root, ".output/chrome-mv3/dictionaries/core/manifest.json"),
+    path.join(root, ".output/chrome-mv3/dictionaries/core/dictionary-manifest.json"),
     "utf8",
   ),
 );
@@ -124,7 +127,7 @@ for (const copyright of [
   if (hash !== "fe2a9817987f862eaced948f0468c7f51d2fedfc48c5c505b246a49a3870e9a5")
     throw new Error(`MIT 授权正文不完整或被修改：${copyright}`);
 }
-console.log(`扩展安装清单版本：${actual}`);
+console.log(`扩展安装清单版本：${actual}；生产目录仅有根 manifest.json`);
 console.log(
   `内置词典：${dictionary.entryCount} 条词卡 / ${dictionary.audioCount} 段内置音频（在线朗读）`,
 );

@@ -37,8 +37,8 @@ export function createWorkspace(
       options.lexicon ??
       new CoreLexiconProvider(
         browser.runtime
-          .getURL("/dictionaries/core/manifest.json")
-          .replace(/manifest\.json$/, ""),
+          .getURL("/dictionaries/core/dictionary-manifest.json")
+          .replace(/dictionary-manifest\.json$/, ""),
       );
   const settings =
       ref<import("../../lib/local-model.ts").LocalSettings>(defaultLocalSettings()),

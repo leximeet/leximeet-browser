@@ -213,7 +213,7 @@ export class CoreLexiconProvider implements LexiconProvider {
 
   private async manifest(): Promise<CoreManifest> {
     this.manifestPromise ??= (async () => {
-      const response = await this.fetcher(`${this.baseUrl}manifest.json`);
+      const response = await this.fetcher(`${this.baseUrl}dictionary-manifest.json`);
       if (!response.ok) throw new Error("内置核心词包清单不可读取");
       const manifest = (await response.json()) as CoreManifest;
       if (

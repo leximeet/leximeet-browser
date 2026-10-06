@@ -10,7 +10,7 @@ const root = resolve("public/dictionaries/core");
 const fetchLocal: typeof fetch = async (url) => {
   const name = String(url).replace("local://core/", "");
   if (
-    !/^(manifest\.json|(?:entries|forms)\/[a-z_]{2}\.jsonl\.gz|audio-index\/[0-9a-f]{2}\.jsonl\.gz|audio\/\d{4}\.bin|catalogs\/(?:index\.json|(?:\d{2}|all)\.json\.gz))$/.test(
+    !/^(dictionary-manifest\.json|(?:entries|forms)\/[a-z_]{2}\.jsonl\.gz|audio-index\/[0-9a-f]{2}\.jsonl\.gz|audio\/\d{4}\.bin|catalogs\/(?:index\.json|(?:\d{2}|all)\.json\.gz))$/.test(
       name,
     )
   )
@@ -24,6 +24,7 @@ const fetchLocal: typeof fetch = async (url) => {
 
 test("核心词包离线读取完整逐义词卡、IPA、来源，文字包不附带录音", async () => {
   const dictionary = new CoreLexiconProvider("local://core/", fetchLocal);
+  assert.equal((await fetchLocal("local://core/manifest.json")).status, 404);
   const entry = await dictionary.lookup("Resilient");
   assert.equal(entry?.normalized, "resilient");
   assert.equal(entry?.source.id, "leximeet-dictionary");
@@ -64,6 +65,8 @@ test("首次冷正文通过词头与词形匹配，不读取释义分片，保�
       await cold.resolveHeadword(word),
       (await full.lookup(word))?.word || null,
     );
+  assert.equal(requested.filter((name) => name === "dictionary-manifest.json").length, 1);
+  assert.equal(requested.includes("manifest.json"), false);
   assert.equal(requested.filter((name) => name === "catalogs/all.json.gz").length, 1);
 });
 

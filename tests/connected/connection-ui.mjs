@@ -50,6 +50,35 @@ export function createConnectionUi(expect) {
       );
     });
   }
+  async function waitForDiscoveryNotification(lab) {
+    if (lab.evidence.actualDiscoveryNotification) return;
+    // Browser 单独记录首次启动；Desktop 随包驱动仍兼容原有 evidence，不重置其预算。
+    const startedAt = lab.evidence.discoveryStartedAt ?? lab.evidence.startedAt;
+    const deadline = Date.parse(startedAt) + 60_000;
+    const remaining = () => {
+      const value = deadline - Date.now();
+      if (!Number.isFinite(value) || value <= 0)
+        throw new Error("启动发现的 60 秒截止已到");
+      return value;
+    };
+    let observedAt;
+    await expect
+      .poll(
+        async () => {
+          remaining();
+          const available = await discoveredNotification(lab);
+          // 读取真实通知也占用原窗口；过期后返回的成功不能成为验收证据。
+          const completedAt = Date.now();
+          if (completedAt >= deadline) throw new Error("启动发现的 60 秒截止已到");
+          if (available) observedAt = completedAt;
+          return available;
+        },
+        { timeout: remaining() },
+      )
+      .toBe(true);
+    lab.evidence.actualDiscoveryNotificationAt = new Date(observedAt).toISOString();
+    lab.evidence.actualDiscoveryNotification = true;
+  }
   async function invitationPopup(lab) {
     await expect
       .poll(() =>
@@ -82,18 +111,7 @@ export function createConnectionUi(expect) {
   async function requestInvitation(lab, requestedBy = "desktop") {
     await prepareDesktopSettings(lab);
     const desktop = lab.desktopPage;
-    if (!lab.evidence.actualDiscoveryNotification) {
-      // Worker 初次 hello 可能早于 Native 来源登记；按产品 30 秒重探测节奏，
-      // 仍限制在本轮启动后的同一 60 秒截止内，不延长配对或业务写入预算。
-      const deadline = Date.parse(lab.evidence.startedAt) + 60_000;
-      const remaining = deadline - Date.now();
-      if (!Number.isFinite(remaining) || remaining <= 0)
-        throw new Error("启动发现的 60 秒截止已到");
-      await expect
-        .poll(() => discoveredNotification(lab), { timeout: remaining })
-        .toBe(true);
-      lab.evidence.actualDiscoveryNotification = true;
-    }
+    await waitForDiscoveryNotification(lab);
     if (requestedBy === "desktop") {
       await expect(
         desktop.getByRole("button", { name: "一键连接", exact: true }),
@@ -165,6 +183,7 @@ export function createConnectionUi(expect) {
     desktopQuery,
     prepareDesktopSettings,
     discoveredNotification,
+    waitForDiscoveryNotification,
     invitationPopup,
     requestInvitation,
     pairThroughUi,

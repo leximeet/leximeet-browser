@@ -22,6 +22,9 @@ let source = resolve(
     join(root, "../../leximeet-dictionary/dist/v0.0.3"),
 );
 const output = join(root, "public/dictionaries/core");
+// 词典数据清单使用独立文件名，避免商店将它识别成第二个扩展安装清单。
+const manifestName = "dictionary-manifest.json";
+const generatorRevision = 2;
 const sha = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const asset = (name, bytes, count) => ({
   file: name,
@@ -48,7 +51,7 @@ if (
 )
   throw new Error("文字包合同不符");
 try {
-  const manifest = JSON.parse(await readFile(join(output, "manifest.json")));
+  const manifest = JSON.parse(await readFile(join(output, manifestName)));
   const assets = [
     ...Object.values(manifest.entries),
     ...Object.values(manifest.forms),
@@ -59,7 +62,8 @@ try {
   ];
   if (
     manifest.schema === "leximeet.browser-text.v3" &&
-    manifest.generatorRevision === 1 &&
+    manifest.generatorRevision === generatorRevision &&
+    !(await readdir(output)).includes("manifest.json") &&
     manifest.sourceReleaseSha256 === lock.releaseSha256 &&
     (await Promise.all(
       assets.map(async (a) => sha(await readFile(join(output, a.file))) === a.sha256),
@@ -244,7 +248,7 @@ try {
   }
   const manifest = {
     schema: "leximeet.browser-text.v3",
-    generatorRevision: 1,
+    generatorRevision,
     dictionaryVersion: "0.0.3",
     entrySchema: "leximeet.entry.v2",
     sourceEdition: "lite-text",
@@ -259,11 +263,15 @@ try {
     ...sections,
     notices,
   };
-  await writeFile(join(stage, "manifest.json"), JSON.stringify(manifest) + "\n");
+  await writeFile(join(stage, manifestName), JSON.stringify(manifest) + "\n");
   // 只替换本脚本管理的生成目录；原词包保存在 previous，直到新产物完整落位。
   let previous;
   try {
-    await readFile(join(output, "manifest.json"));
+    await readFile(join(output, manifestName)).catch((error) => {
+      if (error.code !== "ENOENT") throw error;
+      // 旧名称仅用于识别本脚本的历史生成目录；整目录替换后不再留入生产包。
+      return readFile(join(output, "manifest.json"));
+    });
     previous = output + ".previous";
     await rename(output, previous);
   } catch (e) {

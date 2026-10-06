@@ -25,6 +25,9 @@ ROOT = Path(__file__).resolve().parent.parent
 LOCK = ROOT / "dictionary-core.lock.json"
 OUTPUT = ROOT / "public/dictionaries/core"
 CHUNK_BYTES = 4 * 1024 * 1024
+# 即使手动使用历史生成器，也不能重新引入第二个扩展安装清单。
+MANIFEST_NAME = "dictionary-manifest.json"
+GENERATOR_REVISION = 5
 
 
 def digest(path: Path) -> tuple[int, str]:
@@ -134,9 +137,10 @@ def generated_files(manifest: dict) -> list[dict]:
 
 def existing_is_valid(output: Path, release_hash: str) -> bool:
     try:
-        manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
+        manifest = json.loads((output / MANIFEST_NAME).read_text(encoding="utf-8"))
         if (manifest["schema"] != "leximeet.browser-core.v2" or
-                manifest.get("generatorRevision") != 4 or
+                manifest.get("generatorRevision") != GENERATOR_REVISION or
+                (output / "manifest.json").exists() or
                 manifest["sourceReleaseSha256"] != release_hash):
             return False
         return all(digest(output / item["file"]) == (item["bytes"], item["sha256"])
@@ -150,8 +154,10 @@ def build(source: Path, output: Path) -> dict:
     release = verify_release(source, lock)
     if output.exists() and existing_is_valid(output, lock["releaseSha256"]):
         print(f"核心词包已核验，可复用：{output}")
-        return json.loads((output / "manifest.json").read_text(encoding="utf-8"))
-    if output.exists() and not (output / "manifest.json").is_file():
+        return json.loads((output / MANIFEST_NAME).read_text(encoding="utf-8"))
+    # 兼容旧生成目录并整体替换，旧 manifest.json 不复制到新产物。
+    if output.exists() and not any((output / name).is_file()
+                                   for name in (MANIFEST_NAME, "manifest.json")):
         raise ValueError("目标目录不是 Browser 生成的核心词包，拒绝覆盖")
     output.parent.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix=".core-stage-", dir=output.parent))
@@ -278,7 +284,7 @@ def build(source: Path, output: Path) -> dict:
                 notices.append({"file": name, "bytes": size, "sha256": sha})
         manifest = {
             "schema": "leximeet.browser-core.v2",
-            "generatorRevision": 4,
+            "generatorRevision": GENERATOR_REVISION,
             "dictionaryVersion": release["dictionary_version"],
             "entrySchema": release["entry_schema"],
             "sourceEdition": "core",
@@ -296,7 +302,7 @@ def build(source: Path, output: Path) -> dict:
             "audioIndex": audio_index.finish(stage / "audio-index"),
             "audioChunks": chunks, "notices": notices,
         }
-        (stage / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False,
+        (stage / MANIFEST_NAME).write_text(json.dumps(manifest, ensure_ascii=False,
                                                       sort_keys=True, separators=(",", ":")) + "\n", encoding="utf-8")
         if output.exists():
             backup = output.with_name(output.name + ".previous")

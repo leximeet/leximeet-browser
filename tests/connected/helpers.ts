@@ -19,6 +19,8 @@ export async function withLab(
   let failure: unknown;
   lab.evidence.testScenarioPassed = false;
   try {
+    // 业务 seed 前观察启动通知，保留原 60 秒绝对截止，不把后续资料准备算进发现。
+    await waitForDiscoveryNotification(lab);
     await run(lab);
   } catch (error) {
     failure = error;
@@ -164,6 +166,7 @@ export const {
   desktopQuery,
   prepareDesktopSettings,
   discoveredNotification,
+  waitForDiscoveryNotification,
   invitationPopup,
   requestInvitation,
   pairThroughUi,
