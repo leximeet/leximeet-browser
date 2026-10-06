@@ -98,3 +98,7 @@ npm run verify:store-packages # 核验两份 ZIP 和同一生产字节
 代码采用[AGPL-3.0-only](LICENSE)。内置 Dictionary 0.0.3 Lite Text（26,417 词），安装 Core 增量后共 117,902 词；公共数据遵守包内各自许可，不含离线音频。默认有道发音只发送公开词头，也可设置自定义的公开 HTTPS 发音；微软 Provider 尚未接入。
 
 感谢 LexiMeet Dictionary 及其数据来源、Tabler、Vue、WXT、fzstd、Playwright 和 FSRS 作者，也感谢 Read Frog、AIPex、Chrome Extensions Samples、Aictionary 和 qwerty-learner 提供的参考。完整声明见[第三方与许可](docs/第三方与许可.md)。
+
+## 正式下载
+
+[1.0.0 Release](https://github.com/leximeet/leximeet-browser/releases/tag/1.0.0)提供 Chrome 与 Edge ZIP、完整对应源码和校验文件。安装步骤、商店与验证边界见[本版说明](docs/版本/1.0.0.md)。
