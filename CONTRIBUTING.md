@@ -1,5 +1,9 @@
 # 贡献指南
 
+GitHub 和 Gitee 是平级的代码与协作平台，可在任一平台阅读源码、提交 Issue 或发起 Pull Request。同一问题请保留一个主讨论地址；跨平台补充时互相链接，避免重复处理。
+
+[GitHub 仓库](https://github.com/leximeet/leximeet-browser) · [Gitee 仓库](https://gitee.com/leximeet/leximeet-browser)
+
 先读[架构与数据](docs/架构与数据.md)、[学习规则](docs/学习与复习.md)与[开发指南](docs/开发指南.md)。维护者在 main 集成工作；贡献者可以按公开仓库的协作方式提出修改，发布由维护者明确执行。
 
 ```sh

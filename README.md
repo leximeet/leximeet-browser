@@ -31,6 +31,8 @@
 | 保留真实单句和精确词位         | 默认10词新学/20词复习，积分与FSRS分层      | 默认脱敏、七天同语境去重        |
 | Lite内置，Core增量可选         | 同范围各练法独立进度、草稿可恢复、随时重开 | 连接不上传/合并独立库，失联停写 |
 
+源码与协作：[GitHub](https://github.com/leximeet/leximeet-browser) · [Gitee](https://gitee.com/leximeet/leximeet-browser)。两个平台平级；下载时请核对对应版本的发行说明与校验文件。
+
 ## 快速开始
 
 需要 Node.js 22.12+ 和 Chrome/Chromium 142+。下列命令会启动独立的可见验收浏览器，不影响日常使用的 Chrome：
