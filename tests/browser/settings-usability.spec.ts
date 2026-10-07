@@ -202,6 +202,12 @@ test("真实采集语境按字段隐藏，当前页不空白且重开及恢复�
     await expect(card.locator(".lm-sense").first()).toBeVisible();
     await unchanged();
     await manager.reload();
+    // load 只代表入口文件已载入；词库和词条分片仍会异步读取。
+    // 先确认实际词卡已出现、读取结束，再检查隐藏字段，避免空 DOM 提前通过。
+    await expect(
+      card.getByRole("heading", { name: "resilient", exact: true }),
+    ).toBeVisible();
+    await expect(card.getByText("正在读取词条…", { exact: true })).toHaveCount(0);
     await expect(contextTab).toHaveCount(0);
     await expect(card.locator(".lm-sense").first()).toBeVisible();
     await unchanged();
