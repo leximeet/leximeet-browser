@@ -12,3 +12,39 @@
 - 自动化全部无头，原样生产包/真实SIDE_PANEL、零重试/skip/only，独占profile/进程/端口；禁止系统键鼠、剪贴板/日期或日常资料。真实套件避免与其他AI竞争运行。
 - 视觉修改保留明暗/窄窗的当前展示；改前对照和过程证据归档仓外。原型设计采用Product Design，已有业务与UI不因文档整理被重画。
 - 公共docs只存结果/使用/架构/路线/许可，重要信息和素材在仓内自足。原始过程日志放工作区过程目录；公开文件不含私人路径、token或用户库。
+
+<!-- intraview-workspace-start[v0.9.21] -->
+## Intraview Tour Builder
+
+The Intraview extension enables interactive code tours and contextual feedback collection.
+
+### CLI Commands
+
+VS Code (or Cursor/Windsurf) must be open with this workspace loaded. Verify the connection before creating tours with `~/.intraview/bin/intraview status`.
+
+```bash
+~/.intraview/bin/intraview tour create --question "How does auth work?"
+~/.intraview/bin/intraview tour list
+~/.intraview/bin/intraview tour validate <workflow_id>
+~/.intraview/bin/intraview nav next
+~/.intraview/bin/intraview feedback add --file src/auth.js --line 42 --text "Fix this"
+~/.intraview/bin/intraview --help
+```
+
+### Use Cases
+
+- **Code Tours**: Create guided walkthroughs of codebases for onboarding, code review, or learning
+- **Alignment & Feedback**: Capture structured feedback on code or architectural plans
+- **Batched Audits**: Collect and export user feedback across multiple files for review sessions
+
+### Feedback Collection
+
+Users can provide feedback in two ways:
+
+1. **Tour Feedback**: Inline feedback during code tours (automatically captured)
+2. **Standalone Feedback**: Select code and use "Intraview: Add Feedback" context menu
+   - **Keyboard**: CMD+H (Mac) or CTRL+H (Windows/Linux)
+   - **Context Menu**: Right-click selected code → "Intraview: Add Feedback"
+
+Feedback includes file context (path, line, snippet) and can be exported.
+<!-- intraview-workspace-end -->
