@@ -171,10 +171,15 @@ export function mountReader(
   highlightsStyle.textContent =
     "::highlight(leximeet-target){background-color:#4b9bcb30;text-decoration:underline solid #4b9bcb 1px}::highlight(leximeet-manual){background-color:#87b89738;text-decoration:underline solid #719e7a 1px}::highlight(leximeet-both){background-color:#aa8fcd30;text-decoration:underline solid #9276b6 1px}::highlight(leximeet-encounter){background-color:#87b89738;text-decoration:underline solid #719e7a 1px}::highlight(leximeet-current){background-color:#e4c87270;text-decoration:underline solid #ae8641 2px}::highlight(leximeet-collected){background-color:#659f7760;text-decoration:underline solid #467655 2px}";
   document.head.append(highlightsStyle);
+  let noticeTimer: ReturnType<typeof setTimeout> | undefined;
   function showNotice(text: string, capture = false) {
+    // 所有网页提示共用生命周期；重复文案也重新计时，旧计时不能关闭新提示。
+    clearTimeout(noticeTimer);
+    noticeTimer = undefined;
     notice.textContent = text;
     notice.classList.toggle("capture", capture);
     notice.hidden = !text;
+    if (text) noticeTimer = setTimeout(() => showNotice(""), 3500);
   }
   const speechAvailable = true;
   const voice = createPronunciationPlayer(
@@ -825,13 +830,7 @@ export function mountReader(
         start: item.start,
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       }),
-    notice: (text) => {
-      showNotice(text);
-      if (text)
-        setTimeout(() => {
-          if (notice.textContent === text) showNotice("");
-        }, 3500);
-    },
+    notice: (text) => showNotice(text),
   });
   document.addEventListener(
     "fullscreenchange",
@@ -1196,6 +1195,7 @@ export function mountReader(
   ctx.onInvalidated(() => {
     ++scanVersion;
     stop("扩展已重新加载");
+    clearTimeout(noticeTimer);
     stopSpeech();
     clearInterval(leaseTimer);
     collector?.dispose();

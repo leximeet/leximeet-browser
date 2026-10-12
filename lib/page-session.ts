@@ -87,7 +87,7 @@ export type PendingCaptureSwitch = CaptureSwitch & {
   generation: string;
   documentId: string;
 };
-// 会话存储也需校验；损坏元数据不能指定任意标签或假装恢复采集。
+// 只有非空草稿需要确认；旧会话中的空确认也不能在 worker 重启后再次弹出。
 export function validCaptureSwitch(value: unknown): value is PendingCaptureSwitch {
   const x = value as PendingCaptureSwitch;
   return (
@@ -97,7 +97,7 @@ export function validCaptureSwitch(value: unknown): value is PendingCaptureSwitc
     x.id.length <= 100 &&
     [x.tabId, x.destinationTabId].every((n) => Number.isInteger(n) && n >= 0) &&
     Number.isInteger(x.unsavedCount) &&
-    x.unsavedCount >= 0 &&
+    x.unsavedCount > 0 &&
     x.unsavedCount <= 50 &&
     typeof x.title === "string" &&
     x.title.length <= 300 &&

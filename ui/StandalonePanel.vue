@@ -179,11 +179,13 @@ async function selectRow(item: (typeof rows.value)[number]) {
 }
 async function changeTab(next: "encounter" | "capture") {
   if (!state.value || next === tab.value || busy.value || captureSwitch.value) return;
-  if (activeCapture.value) {
+  if (page.value?.drafts.length) {
     switchingTab.value = next;
     return;
   }
-  if (page.value?.phase === "analyzing") await action("cancel");
+  // 空采集直接结束，不能把启用采集误当作有未保存内容。
+  if (activeCapture.value || page.value?.phase === "analyzing")
+    if (!(await action("cancel"))) return;
   tab.value = next;
   // 选择采集即是开始进行采集；网页不可读/失联仍走真实业务闸门并显示原因。
   if (next === "capture" && !page.value?.drafts.length)
@@ -215,7 +217,7 @@ async function finishSwitch(keep: boolean) {
 }
 async function openManager() {
   if (busy.value || captureSwitch.value) return;
-  if (activeCapture.value || page.value?.drafts.length) {
+  if (page.value?.drafts.length) {
     openingManager.value = true;
     return;
   }

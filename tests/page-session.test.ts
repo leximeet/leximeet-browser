@@ -138,6 +138,7 @@ test("切换确认只接受有界的原文档身份和草稿数量，拒绝损�
     null,
     { ...valid, tabId: -1 },
     { ...valid, documentId: "" },
+    { ...valid, unsavedCount: 0 },
     { ...valid, unsavedCount: 51 },
     { ...valid, title: "x".repeat(301) },
     { ...valid, id: false },

@@ -760,8 +760,8 @@ export default defineBackground(() => {
         if (pageWindows.get(page.tabId) !== info.windowId || page.tabId === info.tabId)
           continue;
         if (page.phase === "capture") {
-          // 浏览器标签已切换，先恢复原网页，保留未提交草稿并向真实侧栏请求决定。
-          if (!captureSwitches.has(info.windowId))
+          // 标签切换始终释放采集锁；只有真实待加入草稿才需要用户决定。
+          if (page.drafts.length > 0 && !captureSwitches.has(info.windowId))
             captureSwitches.set(info.windowId, {
               id: crypto.randomUUID(),
               tabId: page.tabId,

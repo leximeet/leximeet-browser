@@ -391,6 +391,25 @@ test("真实双端采集 UI：侧栏打开仍可浮球采词，两种采集只�
       panel.getByRole("button", { name: "结束采集", exact: true }),
     ).toBeVisible();
     await expect(panel.locator(".lm-row")).toHaveCount(0);
+    // 连接后仍按真实草稿决定确认；空会话切模式、切网页不能阻碍阅读或写入 A。
+    const switchDialog = panel.getByRole("dialog", { name: "继续采集吗？" });
+    await panel.getByRole("button", { name: "遇见", exact: true }).click();
+    await expect(switchDialog).toHaveCount(0);
+    await panel.getByRole("button", { name: "采集", exact: true }).click();
+    await expect(
+      panel.getByRole("button", { name: "结束采集", exact: true }),
+    ).toBeVisible();
+    const otherReading = await lab.context.newPage();
+    await otherReading.goto(lab.url);
+    await expect(
+      panel.getByRole("button", { name: "开始采集", exact: true }),
+    ).toBeEnabled();
+    await expect(switchDialog).toHaveCount(0);
+    await lab.reading.bringToFront();
+    await expect(
+      panel.getByRole("button", { name: "开始采集", exact: true }),
+    ).toBeEnabled();
+    await panel.getByRole("button", { name: "开始采集", exact: true }).click();
     await pickWord(lab.reading, "operation");
     await expect(panel.locator(".lm-row")).toHaveCount(1);
     await expect(panel.locator(".lm-detail h2")).toHaveText("operation");
@@ -435,6 +454,7 @@ test("真实双端采集 UI：侧栏打开仍可浮球采词，两种采集只�
       noImportOfA: true,
       floatVisibleWithRealPanel: true,
       connectedFloatAndPanelBothWriteDesktop: true,
+      emptyCaptureSwitchWithoutConfirmation: true,
       originalBPreserved: true,
       independentAFrozen: true,
       explicitDisconnectRestoresA: true,

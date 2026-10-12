@@ -21,7 +21,7 @@
 
 词遇浏览器插件是一款 Chromium MV3 扩展。独立使用时，可以管理单词和笔记、设置学习规划并练习；连接 Desktop 后，可以在网页查看桌面词卡，采集的内容直接存入桌面端。原有独立资料会封存，明确断开连接后即可恢复。
 
-当前版本为 **1.0.0**。支持独立学习和本机桌面连接；账号与云同步列入后续路线。发布物、目标平台与验收范围以对应版本的发行说明为准。[测试与验收](docs/测试与验收.md)
+当前源码版本为 **1.0.2**。支持独立学习和本机桌面连接；账号与云同步列入后续路线。发布物、目标平台与验收范围以对应版本的发行说明为准。[测试与验收](docs/测试与验收.md)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/usage-reading-workspace-dark.png">
@@ -113,11 +113,11 @@ npm run verify:store-packages # 核验两份 ZIP 和同一生产字节
 
 ## 正式下载
 
-日常安装使用商店。商店页面上的版本为 1.0.0。
+日常安装使用商店。实际版本以商店详情页为准；新版本提交审核后才会更新。
 
 | 浏览器         | 安装入口                                                                                                                   | 公开标识                           |
 | -------------- | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
 | Chrome         | [Chrome 插件](https://chromewebstore.google.com/detail/%E8%AF%8D%E9%81%87-leximeet/ffpencpinagmaiggednonfipgfmgmcdn)       | `ffpencpinagmaiggednonfipgfmgmcdn` |
 | Microsoft Edge | [Edge 插件](https://microsoftedge.microsoft.com/addons/detail/%E8%AF%8D%E9%81%87leximeet/lokiongmifeccfecjjcmcdpihpohfmnc) | `lokiongmifeccfecjjcmcdpihpohfmnc` |
 
-[1.0.0 Release](https://github.com/leximeet/leximeet-browser/releases/tag/1.0.0)另提供 Chrome 与 Edge ZIP、完整对应源码和校验文件，用于核对或开发者模式加载。步骤与验证边界见[本版说明](docs/版本/1.0.0.md)。
+[1.0.2 Release](https://github.com/leximeet/leximeet-browser/releases/tag/1.0.2)另提供 Chrome 与 Edge ZIP、完整对应源码和校验文件，用于核对或开发者模式加载。步骤与验证边界见[本版说明](docs/版本/1.0.2.md)。
