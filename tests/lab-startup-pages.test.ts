@@ -6,6 +6,10 @@ import {
   activateLabPage,
 } from "../scripts/lib/lab-startup-pages.mjs";
 import { DEFAULT_READING_URL } from "../lib/reading-page.mjs";
+import { startIsolatedBrowser } from "../scripts/launch-isolated-browser.mjs";
+import { mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 // 此处只验证启动策略和故障分支；真实安装、标签选择、侧栏与清理由 lab/随包 E2E 验证。
 test("人工默认 Node.js 文档，后台默认回环 fixture，显式地址可供真实故障验证", () => {
@@ -112,4 +116,33 @@ test("教学已关闭时不可悄悄改选管理页，避免把引导失败误�
     }),
     /关闭或未就绪/,
   );
+});
+
+test("lab 在启动浏览器前拒绝与源码不同的旧安装包，错误提示当前应用版本", async () => {
+  const root = await mkdtemp(join(tmpdir(), "leximeet-lab-stale-package-"));
+  const source = JSON.parse(
+    await readFile(new URL("../package.json", import.meta.url), "utf8"),
+  );
+  const messages: string[] = [];
+  try {
+    await writeFile(
+      join(root, "manifest.json"),
+      JSON.stringify({
+        manifest_version: 3,
+        version: "0.0.1",
+        permissions: ["nativeMessaging"],
+        host_permissions: ["http://*/*", "https://*/*"],
+      }),
+    );
+    await assert.rejects(
+      startIsolatedBrowser({
+        extensionDir: root,
+        onStatus: (message) => messages.push(message),
+      }),
+      (error: Error) => error.message.includes(source.version),
+    );
+    assert.deepEqual(messages, []);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });

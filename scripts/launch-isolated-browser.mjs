@@ -43,13 +43,18 @@ export async function startIsolatedBrowser({
   const manifest = JSON.parse(
     await readFile(join(extensionDir, "manifest.json"), "utf8"),
   );
+  // 应用版本随发版更新；安装包必须来自当前源码，不能把协议版本当作应用版本。
+  const appVersion = JSON.parse(
+    await readFile(resolve(import.meta.dirname, "../package.json"), "utf8"),
+  ).version;
   if (
-    manifest.version !== "1.0.0" ||
+    manifest.manifest_version !== 3 ||
+    manifest.version !== appVersion ||
     !manifest.permissions?.includes("nativeMessaging") ||
     JSON.stringify(manifest.host_permissions) !==
       JSON.stringify(["http://*/*", "https://*/*"])
   )
-    throw new Error("请先运行 npm run build，并核对 1.0.0 manifest");
+    throw new Error(`请先运行 npm run build，并核对 ${appVersion} manifest`);
   const dictionary = JSON.parse(
     await readFile(
       join(extensionDir, "dictionaries/core/dictionary-manifest.json"),

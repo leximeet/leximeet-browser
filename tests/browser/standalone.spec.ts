@@ -17,6 +17,10 @@ test("0.0.3 Lite Text 真实目录、逐义词卡、关联和明暗设置", asyn
   extension,
 }, info) => {
   const page = await workspace(extension);
+  const installedVersion = await extension.worker.evaluate(
+    () => (globalThis as any).chrome.runtime.getManifest().version,
+  );
+  await expect(page.locator(".v3-version")).toHaveText(`v${installedVersion}`);
   await navigate(page, "词库中心");
   await expect(page.locator(".mg-theme-card")).toHaveCount(16);
   await page.getByRole("button", { name: "专业", exact: true }).click();

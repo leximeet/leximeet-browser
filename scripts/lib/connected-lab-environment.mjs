@@ -134,12 +134,14 @@ export function checkConnectedEnvironment({
     throw new Error("双端联调需要 Node.js 24 或更新版本");
   const read = (file) => JSON.parse(fs.readFileSync(file, "utf8"));
   const manifest = read(path.join(extensionDir, "manifest.json"));
+  // Browser 应用独立发补丁版，LMCP 身份继续由冻结声明核验。
+  const appVersion = read(path.join(browserRoot, "package.json")).version;
   if (
     manifest.manifest_version !== 3 ||
-    !/^1\.0\.0(?:\.\d+)?$/.test(manifest.version) ||
+    manifest.version !== appVersion ||
     !manifest.permissions?.includes("nativeMessaging")
   )
-    throw new Error("请先构建 Browser 1.0.0，核对 Native Messaging 权限");
+    throw new Error(`请先构建 Browser ${appVersion}，核对 Native Messaging 权限`);
   const declaration = read(path.join(extensionDir, "lmcp-readiness.json"));
   if (
     declaration.contractVersion !== CONNECTOR_VERSION ||

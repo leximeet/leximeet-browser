@@ -20,6 +20,8 @@ import { DEFAULT_READING_URL } from "../lib/reading-page.mjs";
 import type { LibraryItem } from "../lib/workspace-model.ts";
 import LearningForecast from "./workspace/LearningForecast.vue";
 import type { Notebook } from "../lib/local-model.ts";
+// 显示实际安装包版本，避免发版后仍出现固定的旧版本文案。
+const applicationVersion = browser.runtime.getManifest().version;
 const tutorial = useOnboardingGuide();
 const guideReturning = computed(
   () =>
@@ -226,7 +228,7 @@ onUnmounted(() => {
           <span>词遇 LexiMeet</span
           ><small
             >{{ dictionary?.active === "core-text" ? "Core Text" : "Lite Text" }} 0.0.3
-            <span class="v3-version">v1.0.0</span></small
+            <span class="v3-version">v{{ applicationVersion }}</span></small
           >
         </header>
         <div class="mg-frame">
