@@ -3,6 +3,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { verifyConnectedRelease } from "./verify-connected-release.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const sha256 = (bytes) => crypto.createHash("sha256").update(bytes).digest("hex");
@@ -42,13 +43,22 @@ export function verifyPackages(directory, evidence, tag, commit) {
   return files;
 }
 
-export function packageRelease(directory, output, tag = process.env.GITHUB_REF_NAME) {
+export function packageRelease(
+  directory,
+  output,
+  tag = process.env.GITHUB_REF_NAME,
+  connectedEvidencePath,
+) {
   const commit = git("rev-parse", "HEAD");
   const pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
   const evidence = JSON.parse(
     fs.readFileSync(path.join(directory, "store-packages.json"), "utf8"),
   );
   const files = verifyPackages(directory, evidence, tag, commit);
+  const connected = connectedEvidencePath
+    ? JSON.parse(fs.readFileSync(connectedEvidencePath, "utf8"))
+    : undefined;
+  if (connected) verifyConnectedRelease(evidence, connected, tag, commit);
   if (pkg.version !== tag || git("status", "--porcelain"))
     throw new Error("正式发行要求已提交且版本一致的源码");
   fs.mkdirSync(path.dirname(output), { recursive: true });
@@ -59,6 +69,11 @@ export function packageRelease(directory, output, tag = process.env.GITHUB_REF_N
     path.join(directory, "store-packages.json"),
     path.join(output, "store-packages.json"),
   );
+  if (connected)
+    fs.copyFileSync(
+      connectedEvidencePath,
+      path.join(output, "connected-store-packages.json"),
+    );
   fs.copyFileSync(path.join(root, "LICENSE"), path.join(output, "LICENSE"));
   const archive = `leximeet-browser-source-${tag}.tar.gz`;
   git(
@@ -85,11 +100,12 @@ export function packageRelease(directory, output, tag = process.env.GITHUB_REF_N
     productionFiles: evidence.productionFiles,
     verification: {
       standalone: "passed",
-      connected: "separate-workflow",
+      connected: connected ? "passed" : "separate-workflow",
       edgeBrowser: "manual",
       stores: "separate-publication",
     },
   };
+  if (connected) source.connectedWith = connected.connectedWith;
   fs.writeFileSync(
     path.join(output, "SOURCE.json"),
     JSON.stringify(source, null, 2) + "\n",
@@ -108,6 +124,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     const source = packageRelease(
       path.resolve(process.argv[2] || ".output"),
       path.resolve(process.argv[3] || ".output/github-release"),
+      process.env.GITHUB_REF_NAME,
+      process.argv[4] ? path.resolve(process.argv[4]) : undefined,
     );
     console.log(`正式发行附件已核验：${source.version} ${source.sourceCommit}`);
   } catch (error) {

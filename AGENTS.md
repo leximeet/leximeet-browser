@@ -14,6 +14,7 @@
 - 公共docs只存结果/使用/架构/路线/许可，重要信息和素材在仓内自足。原始过程日志放工作区过程目录；公开文件不含私人路径、token或用户库。
 
 <!-- intraview-workspace-start[v0.9.21] -->
+
 ## Intraview Tour Builder
 
 The Intraview extension enables interactive code tours and contextual feedback collection.
@@ -47,4 +48,5 @@ Users can provide feedback in two ways:
    - **Context Menu**: Right-click selected code → "Intraview: Add Feedback"
 
 Feedback includes file context (path, line, snippet) and can be exported.
+
 <!-- intraview-workspace-end -->

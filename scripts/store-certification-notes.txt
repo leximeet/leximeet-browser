@@ -1,0 +1,12 @@
+LexiMeet is a local-first vocabulary learning extension with a Simplified Chinese interface. No account or login is required for independent use.
+
+Testing:
+1. Open the tutorial, or re-enter it from extension management > Settings.
+2. Drag the floating collector onto one English word and release to save it with its original context. The sidebar Capture tab also supports selecting a word.
+3. Left-click the floating button to start/cancel page analysis; right-click opens/closes the sidebar. Hover over a highlighted word to view its word card and pronunciation.
+4. My Vocabulary contains words, contexts, notes and wordbooks. Learning Planning sets daily quotas; Practice Center has six modes, each with saved progress and Restart.
+5. Ordinary page example: https://nodejs.org/en/learn/getting-started/introduction-to-nodejs . Internal browser pages and extension stores restrict content scripts.
+
+The dictionary is bundled locally. Core Text is an optional user-requested download. Pronunciation sends only the headword/accent parameters to the selected service. Requests still carry normal IP/Referer metadata. No ads, account login, cloud sync or telemetry uploads.
+
+Desktop connection is optional. The released macOS arm64 Desktop 1.0.0 installer is at https://github.com/leximeet/leximeet-desktop/releases/tag/1.0.0 . It requires the Native Host and user confirmation. Connected capture uses Desktop data; browser independent data is sealed and restored after explicit disconnect without import/merge. All independent functionality works without Desktop. notifications/alarms are for Desktop discovery, not study reminders.

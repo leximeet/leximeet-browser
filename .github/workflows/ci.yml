@@ -10,7 +10,8 @@ permissions:
   contents: read
 concurrency:
   group: browser-ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # 正式发行开始后不取消正在上传的写请求。
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 jobs:
   browser:
     runs-on: macos-15
@@ -24,6 +25,17 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
+          fetch-depth: 0
+      - name: 核对正式标签对应版本及 main 历史
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          if (!/^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/.test(process.env.RELEASE_TAG) || JSON.parse(fs.readFileSync('package.json', 'utf8')).version !== process.env.RELEASE_TAG) throw new Error('正式标签必须是不带 v 的三段版本，并与 package.json 一致');
+          JS
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: "22"
@@ -77,10 +89,20 @@ jobs:
             ${{ env.LEXIMEET_TEST_OUTPUT }}
           retention-days: 14
 
+  connected:
+    name: 验收正式标签与固定 Desktop/Core 的真实连接
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    needs: browser
+    # 这组固定提交已在真实连接 CI 验收通过；升级 Desktop 时同时核验其 Core gitlink。
+    uses: ./.github/workflows/connected.yml
+    with:
+      desktop_ref: 204dc05d6c17143afd080066bfcb31f9a31006cc
+      core_ref: d1bbb7777ff164e861a4a65f654a990afaf0939f
+
   release:
     name: Publish tested Chrome and Edge packages
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-    needs: browser
+    needs: [browser, connected]
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -96,11 +118,58 @@ jobs:
         with:
           name: browser-store-packages
           path: .output/tested-packages/
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: browser-connected-store-evidence
+          path: .output/connected-evidence/
+      - name: 核对同一源码的独立和连接生产内容
+        run: node scripts/verify-connected-release.mjs .output/tested-packages/store-packages.json .output/connected-evidence/store-packages.json "$GITHUB_REF_NAME" "$GITHUB_SHA"
       - name: 核对原样安装包并归档完整对应源码
-        run: node scripts/package-github-release.mjs .output/tested-packages .output/github-release
+        run: node scripts/package-github-release.mjs .output/tested-packages .output/github-release .output/connected-evidence/store-packages.json
       - name: 完整附件上传后公开正式 Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "$GITHUB_REF_NAME" .output/github-release/* --verify-tag --draft --title "LexiMeet Browser $GITHUB_REF_NAME" --notes-file "docs/版本/$GITHUB_REF_NAME.md"
           gh release edit "$GITHUB_REF_NAME" --draft=false --latest
+
+  stores:
+    name: 自动提交 ${{ matrix.store }} 商店审核
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    needs: [browser, connected, release]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        store: [chrome, edge]
+    environment: ${{ matrix.store }}-store
+    concurrency:
+      group: ${{ matrix.store }}-store
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: "22"
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: browser-store-packages
+          path: .output/tested-packages/
+      # 发布阶段不安装依赖、不重新构建，凭据只交给对应平台的最后一步。
+      - name: Chrome V2 上传并提交审核
+        if: matrix.store == 'chrome'
+        env:
+          CHROME_SERVICE_ACCOUNT_JSON: ${{ secrets.CHROME_SERVICE_ACCOUNT_JSON }}
+          CHROME_PUBLISHER_ID: ${{ vars.CHROME_PUBLISHER_ID }}
+          CHROME_EXTENSION_ID: ${{ vars.CHROME_EXTENSION_ID }}
+        run: node scripts/publish-stores.mjs chrome .output/tested-packages
+      - name: Edge v1.1 上传并提交审核
+        if: matrix.store == 'edge'
+        env:
+          EDGE_CLIENT_ID: ${{ secrets.EDGE_CLIENT_ID }}
+          EDGE_API_KEY: ${{ secrets.EDGE_API_KEY }}
+          EDGE_PRODUCT_ID: ${{ vars.EDGE_PRODUCT_ID }}
+        run: node scripts/publish-stores.mjs edge .output/tested-packages

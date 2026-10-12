@@ -23,7 +23,7 @@ permissions:
   contents: read
   actions: read
 concurrency:
-  group: edge-store-draft
+  group: edge-store
   cancel-in-progress: false
 jobs:
   upload:

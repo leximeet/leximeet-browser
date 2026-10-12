@@ -1,5 +1,13 @@
 name: Browser real Desktop connection
 on:
+  workflow_call:
+    inputs:
+      desktop_ref:
+        required: true
+        type: string
+      core_ref:
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       desktop_ref:
@@ -73,13 +81,36 @@ jobs:
         working-directory: workspace/plugin/leximeet-browser
       - run: npx playwright install chromium
         working-directory: workspace/plugin/leximeet-browser
-      - run: npm run build && npm run verify:manifest
+      - name: 构建并核验连接测试的双商店生产包
+        run: npm run zip && npm run zip:edge && npm run verify:store-packages
         working-directory: workspace/plugin/leximeet-browser
       - run: npm run build
         working-directory: workspace/leximeet-desktop
       # 调用已有driver，生产字节、真实SIDE_PANEL、焦点与清理断言不在YAML重写。
       - run: npm run test:connected
         working-directory: workspace/leximeet-desktop
+      - name: 确认连接测试没有改变被测生产包
+        run: npm run verify:store-packages
+        working-directory: workspace/plugin/leximeet-browser
+      - name: 为成功连接验收绑定实际 Desktop/Core 提交
+        working-directory: workspace/plugin/leximeet-browser
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          const sha = (cwd) => execFileSync('git', ['rev-parse', 'HEAD'], {cwd, encoding:'utf8'}).trim();
+          const location = '.output/store-packages.json';
+          const evidence = JSON.parse(fs.readFileSync(location, 'utf8'));
+          evidence.connectedWith = {verified:true, desktopCommit:sha('../../leximeet-desktop'), coreCommit:sha('../../leximeet-desktop/core-java')};
+          fs.writeFileSync(location, JSON.stringify(evidence, null, 2) + '\n');
+          JS
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: browser-connected-store-evidence
+          path: workspace/plugin/leximeet-browser/.output/store-packages.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: always()
         with:

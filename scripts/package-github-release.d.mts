@@ -22,4 +22,5 @@ export function packageRelease(
   directory: string,
   output: string,
   tag?: string,
+  connectedEvidencePath?: string,
 ): Record<string, unknown>;

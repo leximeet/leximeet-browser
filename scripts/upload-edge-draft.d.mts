@@ -1,4 +1,8 @@
-export function uploadOperationId(location: string | null, productId: string): string;
+export function uploadOperationId(
+  location: string | null,
+  productId: string,
+  kind?: "upload" | "submission",
+): string;
 export function uploadEdgeDraft(options: {
   packagePath: string;
   expectedSha256: string;

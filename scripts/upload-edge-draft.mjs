@@ -8,12 +8,16 @@ const productIdentifier =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // Location 可能是操作 ID 或完整地址；仅提取本产品的操作 ID，不向返回的任意地址发送密钥。
-export function uploadOperationId(location, productId) {
+export function uploadOperationId(location, productId, kind = "upload") {
+  if (!["upload", "submission"].includes(kind)) throw new Error("无效的 Edge 操作类型");
   if (typeof location !== "string" || !location)
     throw new Error("上传响应缺少操作 ID，请在后台检查草稿");
   if (identifier.test(location)) return location;
   const url = new URL(location, apiOrigin);
-  const prefix = `/v1/products/${productId}/submissions/draft/package/operations/`;
+  const prefix =
+    kind === "upload"
+      ? `/v1/products/${productId}/submissions/draft/package/operations/`
+      : `/v1/products/${productId}/submissions/operations/`;
   const id = url.pathname.slice(prefix.length);
   if (
     url.origin !== apiOrigin ||

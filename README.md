@@ -115,9 +115,9 @@ npm run verify:store-packages # 核验两份 ZIP 和同一生产字节
 
 日常安装使用商店。商店页面上的版本为 1.0.0。
 
-| 浏览器         | 安装入口                                                                                                                                                   | 公开标识                         |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| Chrome         | [Chrome 插件](https://chromewebstore.google.com/detail/%E8%AF%8D%E9%81%87-leximeet/ffpencpinagmaiggednonfipgfmgmcdn)                                 | `ffpencpinagmaiggednonfipgfmgmcdn` |
-| Microsoft Edge | [Edge 插件](https://microsoftedge.microsoft.com/addons/detail/%E8%AF%8D%E9%81%87leximeet/lokiongmifeccfecjjcmcdpihpohfmnc)                               | `lokiongmifeccfecjjcmcdpihpohfmnc` |
+| 浏览器         | 安装入口                                                                                                                   | 公开标识                           |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| Chrome         | [Chrome 插件](https://chromewebstore.google.com/detail/%E8%AF%8D%E9%81%87-leximeet/ffpencpinagmaiggednonfipgfmgmcdn)       | `ffpencpinagmaiggednonfipgfmgmcdn` |
+| Microsoft Edge | [Edge 插件](https://microsoftedge.microsoft.com/addons/detail/%E8%AF%8D%E9%81%87leximeet/lokiongmifeccfecjjcmcdpihpohfmnc) | `lokiongmifeccfecjjcmcdpihpohfmnc` |
 
 [1.0.0 Release](https://github.com/leximeet/leximeet-browser/releases/tag/1.0.0)另提供 Chrome 与 Edge ZIP、完整对应源码和校验文件，用于核对或开发者模式加载。步骤与验证边界见[本版说明](docs/版本/1.0.0.md)。
