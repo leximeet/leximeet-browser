@@ -26,5 +26,6 @@ export function publishEdge(
     clientId: string;
     apiKey: string;
     notes: string;
+    resumeUploadOperationId?: string;
   },
 ): Promise<{ state: string; operationId: string; uploadOperationId: string }>;

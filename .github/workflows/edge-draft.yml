@@ -1,4 +1,4 @@
-name: Upload Edge draft package
+name: Upload or resume Edge package
 on:
   workflow_dispatch:
     inputs:
@@ -15,7 +15,16 @@ on:
         required: true
         type: string
       published_product:
-        description: "此产品已在 Edge 首次发布；本次只更新草稿包"
+        description: "此产品已在 Edge 首次发布；允许更新其版本"
+        required: true
+        default: false
+        type: boolean
+      upload_operation_id:
+        description: "已受理上传的操作 ID；填写后只续查该操作，不重新上传"
+        required: false
+        type: string
+      submit_for_review:
+        description: "包处理成功后提交正常审核；默认只更新草稿"
         required: true
         default: false
         type: boolean
@@ -79,17 +88,37 @@ jobs:
           const file = `${directory}/${edge.file}`;
           const bytes = fs.readFileSync(file);
           if (bytes.length !== edge.bytes || crypto.createHash('sha256').update(bytes).digest('hex') !== edge.sha256) throw new Error('Edge 安装包摘要或大小不同');
-          fs.appendFileSync(process.env.GITHUB_OUTPUT, `path=${file}\nsha256=${edge.sha256}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `path=${file}\nsha256=${edge.sha256}\nversion=${source.version}\n`);
           fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `来源提交：${source.sourceCommit}\n\nEdge ZIP：${edge.file}\n\nSHA-256：${edge.sha256}\n\n`);
           JS
-      # 只有这个步骤读取商店密钥；脚本不提供发布接口，也不自动重复上传。
-      - name: 上传并等待 Edge 草稿包处理完成
+      # 仅此步骤读取商店密钥；续查已受理操作，显式勾选才提交审核。
+      - name: 上传或续查 Edge 包，按选择提交审核
         env:
           EDGE_CLIENT_ID: ${{ secrets.EDGE_CLIENT_ID }}
           EDGE_API_KEY: ${{ secrets.EDGE_API_KEY }}
           EDGE_PRODUCT_ID: ${{ vars.EDGE_PRODUCT_ID }}
           PACKAGE_PATH: ${{ steps.package.outputs.path }}
           PACKAGE_SHA256: ${{ steps.package.outputs.sha256 }}
+          PACKAGE_VERSION: ${{ steps.package.outputs.version }}
+          EDGE_UPLOAD_OPERATION_ID: ${{ inputs.upload_operation_id }}
+          SUBMIT_FOR_REVIEW: ${{ inputs.submit_for_review }}
         run: |
-          node scripts/upload-edge-draft.mjs "$PACKAGE_PATH" "$PACKAGE_SHA256"
-          printf '草稿安装包已处理成功。请到 Partner Center 核对资料，由维护者手动提交审核。此工作流没有发布。\n' >> "$GITHUB_STEP_SUMMARY"
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import {uploadEdgeDraft} from './scripts/upload-edge-draft.mjs';
+          import {publishEdge} from './scripts/publish-stores.mjs';
+          const options = {
+            packagePath:process.env.PACKAGE_PATH, expectedSha256:process.env.PACKAGE_SHA256,
+            productId:process.env.EDGE_PRODUCT_ID, clientId:process.env.EDGE_CLIENT_ID, apiKey:process.env.EDGE_API_KEY,
+            resumeUploadOperationId:process.env.EDGE_UPLOAD_OPERATION_ID || undefined,
+          };
+          const submit = process.env.SUBMIT_FOR_REVIEW === 'true';
+          const result = submit
+            ? await publishEdge({...options, version:process.env.PACKAGE_VERSION, notes:fs.readFileSync('scripts/store-certification-notes.txt','utf8')})
+            : await uploadEdgeDraft(options);
+          const summary = submit
+            ? `Edge ${process.env.PACKAGE_VERSION}: ${result.state}；最终上架由商店审核决定。`
+            : `Edge 草稿包处理成功：${result.operationId}。尚未提交审核。`;
+          console.log(summary);
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary + '\n');
+          JS

@@ -155,3 +155,51 @@ test("Edge 状态轮询耗尽后保留操作 ID，不重传或发布", async (t)
   assert.equal(s.calls.length, 3);
   assert.deepEqual(s.waits, [5000]);
 });
+
+test("Edge HTTP 202 的有效状态可继续轮询，但只有 Succeeded 才完成", async (t) => {
+  const s = fixture(t, [
+    accepted(),
+    Response.json({ status: "InProgress" }, { status: 202 }),
+    Response.json({ status: "Succeeded" }, { status: 202 }),
+  ]);
+  assert.equal((await uploadEdgeDraft(s.options)).status, "Succeeded");
+  assert.equal(s.calls.filter((call) => call.options.method === "POST").length, 1);
+  assert.deepEqual(s.waits, [5000]);
+  for (const response of [
+    Response.json({ status: "Failed" }, { status: 202 }),
+    new Response("invalid", { status: 202 }),
+    Response.json({ id: "other", status: "Succeeded" }, { status: 202 }),
+  ]) {
+    const failed = fixture(t, [accepted(), response]);
+    await assert.rejects(uploadEdgeDraft(failed.options));
+    assert.equal(failed.calls.length, 2);
+  }
+});
+
+test("Edge 续查已受理操作仍校验 ZIP 和身份，仅发送 GET", async (t) => {
+  const s = fixture(t, [
+    Response.json({ id: operationId, status: "InProgress" }, { status: 202 }),
+    status("Succeeded"),
+  ]);
+  assert.equal(
+    (await uploadEdgeDraft({ ...s.options, resumeUploadOperationId: operationId }))
+      .operationId,
+    operationId,
+  );
+  assert.deepEqual(
+    s.calls.map((call) => [call.options.method, call.url]),
+    [
+      ["GET", `${origin}${uploadPath}/operations/${operationId}`],
+      ["GET", `${origin}${uploadPath}/operations/${operationId}`],
+    ],
+  );
+  for (const overrides of [
+    { resumeUploadOperationId: "https://evil.example/op" },
+    { resumeUploadOperationId: "" },
+    { resumeUploadOperationId: operationId, expectedSha256: "0".repeat(64) },
+  ]) {
+    const failed = fixture(t, []);
+    await assert.rejects(uploadEdgeDraft({ ...failed.options, ...overrides }));
+    assert.equal(failed.calls.length, 0);
+  }
+});

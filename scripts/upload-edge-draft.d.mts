@@ -12,4 +12,5 @@ export function uploadEdgeDraft(options: {
   fetchImpl?: typeof fetch;
   sleep?: (ms: number) => Promise<void>;
   maxPolls?: number;
+  resumeUploadOperationId?: string;
 }): Promise<{ status: "Succeeded"; operationId: string; sha256: string }>;

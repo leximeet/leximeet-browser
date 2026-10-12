@@ -355,3 +355,60 @@ test("商店没有确认成功时拒绝假完成，不自动重试提交", async
   await assert.rejects(publishEdge({ ...timeout.options, maxPolls: 2 }), /仍在处理/);
   assert.equal(timeout.calls.filter((call) => call.options.method === "POST").length, 2);
 });
+
+test("Edge 恢复已受理上传后只提交一次审核；202 仍按正文状态判断", async (t) => {
+  const s = fixture(t, [
+    Response.json({ status: "Succeeded" }, { status: 202 }),
+    accepted("submission-123"),
+    Response.json({ status: "InProgress" }, { status: 202 }),
+    edgeStatus("Succeeded"),
+  ]);
+  const result = await publishEdge({
+    ...s.options,
+    resumeUploadOperationId: "operation-123",
+  });
+  assert.equal(result.state, "SUBMITTED");
+  assert.equal(result.uploadOperationId, "operation-123");
+  assert.deepEqual(
+    s.calls.map((call) => [call.options.method, call.url]),
+    [
+      [
+        "GET",
+        `https://api.addons.microsoftedge.microsoft.com/v1/products/${productId}/submissions/draft/package/operations/operation-123`,
+      ],
+      [
+        "POST",
+        `https://api.addons.microsoftedge.microsoft.com/v1/products/${productId}/submissions`,
+      ],
+      [
+        "GET",
+        `https://api.addons.microsoftedge.microsoft.com/v1/products/${productId}/submissions/operations/submission-123`,
+      ],
+      [
+        "GET",
+        `https://api.addons.microsoftedge.microsoft.com/v1/products/${productId}/submissions/operations/submission-123`,
+      ],
+    ],
+  );
+  assert.deepEqual(s.waits, [5000]);
+});
+
+test("Edge 已有上传操作失败或一直处理时不重传也不送审", async (t) => {
+  for (const replies of [
+    [Response.json({ status: "Failed" }, { status: 202 })],
+    [
+      Response.json({ status: "InProgress" }, { status: 202 }),
+      Response.json({ status: "InProgress" }, { status: 202 }),
+    ],
+  ]) {
+    const s = fixture(t, replies);
+    await assert.rejects(
+      publishEdge({
+        ...s.options,
+        resumeUploadOperationId: "operation-123",
+        maxPolls: 2,
+      }),
+    );
+    assert.equal(s.calls.filter((call) => call.options.method === "POST").length, 0);
+  }
+});

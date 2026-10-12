@@ -42,6 +42,7 @@ export async function uploadEdgeDraft({
   fetchImpl = fetch,
   sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
   maxPolls = 60,
+  resumeUploadOperationId,
 }) {
   if (!productIdentifier.test(productId ?? ""))
     throw new Error("EDGE_PRODUCT_ID 必须是 Partner Center 的产品 GUID");
@@ -53,29 +54,34 @@ export async function uploadEdgeDraft({
     throw new Error("必须提供已验收 ZIP 及其 SHA-256");
   if (!Number.isInteger(maxPolls) || maxPolls < 1 || maxPolls > 60)
     throw new Error("无效的状态轮询预算");
+  if (resumeUploadOperationId !== undefined && !identifier.test(resumeUploadOperationId))
+    throw new Error("续查必须提供本次已受理上传的操作 ID，不能提供任意地址");
   const bytes = await readFile(packagePath);
   const actualSha256 = createHash("sha256").update(bytes).digest("hex");
   if (actualSha256 !== expectedSha256) throw new Error("安装包 SHA-256 不匹配，未上传");
   const headers = { Authorization: `ApiKey ${apiKey}`, "X-ClientID": clientId };
   const path = `/v1/products/${productId}/submissions/draft/package`;
-  // POST 只发送一次。断网或超时后结果可能不确定，不能自动重复提交。
-  let upload;
-  try {
-    upload = await fetchImpl(`${apiOrigin}${path}`, {
-      method: "POST",
-      headers: { ...headers, "Content-Type": "application/zip" },
-      body: bytes,
-      redirect: "error",
-      signal: AbortSignal.timeout(300_000),
-    });
-  } catch {
-    throw new Error("上传请求结果未知；请先在 Partner Center 检查草稿，勿直接重复上传");
+  // 已受理的操作只续查 GET；常规上传的 POST 仍只发送一次。
+  let operationId = resumeUploadOperationId;
+  if (!operationId) {
+    let upload;
+    try {
+      upload = await fetchImpl(`${apiOrigin}${path}`, {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/zip" },
+        body: bytes,
+        redirect: "error",
+        signal: AbortSignal.timeout(300_000),
+      });
+    } catch {
+      throw new Error("上传请求结果未知；请先在 Partner Center 检查草稿，勿直接重复上传");
+    }
+    if (upload.status !== 202)
+      throw new Error(
+        `Edge 未接受上传（HTTP ${upload.status}），请检查产品、凭据和后台状态`,
+      );
+    operationId = uploadOperationId(upload.headers.get("Location"), productId);
   }
-  if (upload.status !== 202)
-    throw new Error(
-      `Edge 未接受上传（HTTP ${upload.status}），请检查产品、凭据和后台状态`,
-    );
-  const operationId = uploadOperationId(upload.headers.get("Location"), productId);
   for (let attempt = 0; attempt < maxPolls; attempt++) {
     let response;
     try {
@@ -88,7 +94,8 @@ export async function uploadEdgeDraft({
     } catch {
       throw new Error(`无法确认上传状态（操作 ${operationId}），请检查后台；未重复上传`);
     }
-    if (response.status !== 200)
+    // 微软示例和实际接口也返回 202；成功仍必须由 JSON 的 Succeeded 确认。
+    if (![200, 202].includes(response.status))
       throw new Error(
         `状态查询失败（HTTP ${response.status}，操作 ${operationId}），请检查后台`,
       );
@@ -98,6 +105,8 @@ export async function uploadEdgeDraft({
     } catch {
       throw new Error(`状态响应无效（操作 ${operationId}），请检查后台`);
     }
+    if (result.id !== undefined && result.id !== operationId)
+      throw new Error(`状态响应属于其他操作（操作 ${operationId}），请检查后台`);
     if (result.status === "Succeeded")
       return { status: "Succeeded", operationId, sha256: actualSha256 };
     if (result.status !== "InProgress")
@@ -118,6 +127,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       productId: process.env.EDGE_PRODUCT_ID,
       clientId: process.env.EDGE_CLIENT_ID,
       apiKey: process.env.EDGE_API_KEY,
+      resumeUploadOperationId: process.env.EDGE_UPLOAD_OPERATION_ID || undefined,
     });
     console.log(
       `Edge 草稿包处理成功：${result.operationId}，SHA-256 ${result.sha256}。尚未提交审核或发布。`,
