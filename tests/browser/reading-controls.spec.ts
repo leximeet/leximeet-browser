@@ -116,8 +116,12 @@ test("采集直接就绪：无全文查词/高亮，悬停辅助与跨节点原�
       panel.getByRole("button", { name: "结束采集", exact: true }),
     ).toBeVisible();
     await panel.getByRole("button", { name: "遇见", exact: true }).click();
-    await expect(dialog).toContainText("当前没有待加入的单词");
-    await dialog.getByRole("button", { name: "不继续，丢弃未加入", exact: true }).click();
+    // 已保存及已丢弃的草稿不再需要确认；空会话直接切换并恢复网页交互。
+    await expect(dialog).toHaveCount(0);
+    await expect(panel.getByRole("button", { name: "遇见", exact: true })).toHaveClass(
+      /active/,
+    );
+    await expect(reading.locator("#first")).not.toHaveCSS("cursor", "grab");
     await reading.getByRole("button", { name: "Site button", exact: true }).click();
     await expect(reading.locator("#site")).toHaveText("restored");
     await info.attach("direct-picking-evidence", {
@@ -131,6 +135,7 @@ test("采集直接就绪：无全文查词/高亮，悬停辅助与跨节点原�
           crossInlineUtf16Context: true,
           samePositionDeduplicated: true,
           savedFactsPreservedOnDiscard: true,
+          emptyModeSwitchWithoutConfirmation: true,
         }),
       ),
     });
