@@ -159,12 +159,21 @@ jobs:
           name: browser-store-packages
           path: .output/tested-packages/
       # 发布阶段不安装依赖、不重新构建，凭据只交给对应平台的最后一步。
+      - name: 核对 Chrome 当前版本仍是最新正式发行
+        if: matrix.store == 'chrome'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh api --paginate --slurp "repos/$GH_REPO/releases?per_page=100" > "$RUNNER_TEMP/chrome-releases.json"
+          node scripts/verify-latest-store-release.mjs "$RUNNER_TEMP/chrome-releases.json" "$GITHUB_REF_NAME"
       - name: Chrome V2 上传并提交审核
         if: matrix.store == 'chrome'
         env:
           CHROME_SERVICE_ACCOUNT_JSON: ${{ secrets.CHROME_SERVICE_ACCOUNT_JSON }}
           CHROME_PUBLISHER_ID: ${{ vars.CHROME_PUBLISHER_ID }}
           CHROME_EXTENSION_ID: ${{ vars.CHROME_EXTENSION_ID }}
+          CHROME_REPLACE_PENDING_REVIEW: "1"
         run: node scripts/publish-stores.mjs chrome .output/tested-packages
       - name: Edge v1.1 上传并提交审核
         if: matrix.store == 'edge'

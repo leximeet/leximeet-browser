@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { uploadEdgeDraft, uploadOperationId } from "./upload-edge-draft.mjs";
 import { verifyPackages } from "./package-github-release.mjs";
+import { compareVersions } from "./verify-latest-store-release.mjs";
 
 const chromeOrigin = "https://chromewebstore.googleapis.com";
 const edgeOrigin = "https://api.addons.microsoftedge.microsoft.com";
@@ -13,7 +14,7 @@ const versionPattern = /^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/;
 const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // 商店响应可能含个人信息或凭据。只报告固定阶段、HTTP 状态和已校验的操作 ID。
-async function jsonRequest(fetchImpl, url, options, stage) {
+async function jsonRequest(fetchImpl, url, options, stage, emptyResponse = false) {
   let response;
   try {
     response = await fetchImpl(url, {
@@ -26,6 +27,12 @@ async function jsonRequest(fetchImpl, url, options, stage) {
   }
   if (!response.ok)
     throw new Error(`${stage}失败（HTTP ${response.status}），请检查商店后台`);
+  // cancelSubmission 成功没有 JSON。仍须另查状态，不能把空响应当作取消已生效。
+  if (emptyResponse) {
+    if (![200, 204].includes(response.status))
+      throw new Error(`${stage}结果未确认，请检查商店后台；没有自动重试写请求`);
+    return;
+  }
   try {
     return await response.json();
   } catch {
@@ -95,6 +102,7 @@ export async function publishChrome({
   publisherId,
   extensionId,
   accessToken,
+  replacePendingReview = false,
   fetchImpl = fetch,
   sleep = pause,
   maxPolls = 60,
@@ -110,7 +118,8 @@ export async function publishChrome({
     /[\r\n]/.test(accessToken) ||
     !Number.isInteger(maxPolls) ||
     maxPolls < 1 ||
-    maxPolls > 60
+    maxPolls > 60 ||
+    typeof replacePendingReview !== "boolean"
   )
     throw new Error("Chrome 凭据或轮询预算无效");
   const bytes = await checkedZip(packagePath, expectedSha256);
@@ -131,23 +140,93 @@ export async function publishChrome({
         "Chrome 状态查询",
       ),
     );
-  const before = await getStatus();
-  if (before.takenDown) throw new Error("Chrome 扩展已被下架，请先检查后台");
-  // 补跑失败任务时，已发布/已送审的同版本不再上传。不同版本正在审核时不能覆盖。
-  for (const revision of [
-    before.submittedItemRevisionStatus,
-    before.publishedItemRevisionStatus,
-  ]) {
-    const versions =
-      revision?.distributionChannels?.map((channel) => channel.crxVersion) ?? [];
+  const versionsOf = (revision) => {
+    if (!revision) return [];
+    const channels = revision.distributionChannels;
     if (
-      ["PENDING_REVIEW", "PUBLISHED"].includes(revision?.state) &&
-      versions.includes(version)
+      !Array.isArray(channels) ||
+      !channels.length ||
+      channels.some((channel) => !versionPattern.test(channel?.crxVersion ?? ""))
     )
-      return { state: revision.state, alreadySubmitted: true, version };
+      throw new Error("Chrome 商店版本信息不完整，停止写入");
+    return [...new Set(channels.map((channel) => channel.crxVersion))];
+  };
+  const checkStatus = (status) => {
+    if (status.takenDown) throw new Error("Chrome 扩展已被下架，请先检查后台");
+    const published = status.publishedItemRevisionStatus;
+    const submitted = status.submittedItemRevisionStatus;
+    if (published && published.state !== "PUBLISHED")
+      throw new Error("Chrome 已发布状态未知或不是公开发行，停止写入");
+    const publishedVersions = versionsOf(published);
+    if (publishedVersions.some((value) => compareVersions(value, version) > 0))
+      throw new Error("Chrome 已发布更新版本，停止旧工作流写入");
+    // 已结束的取消/拒绝记录可能没有渠道信息；只对活动提交要求确切版本。
+    if (
+      submitted &&
+      !["PENDING_REVIEW", "STAGED", "PUBLISHED", "REJECTED", "CANCELLED"].includes(
+        submitted.state,
+      )
+    )
+      throw new Error("Chrome 提交状态未知，停止写入");
+    const submittedVersions = ["PENDING_REVIEW", "STAGED", "PUBLISHED"].includes(
+      submitted?.state,
+    )
+      ? versionsOf(submitted)
+      : [];
+    if (submittedVersions.length > 1)
+      throw new Error("Chrome 待审核版本不唯一，停止写入");
+    if (submittedVersions.some((value) => compareVersions(value, version) > 0))
+      throw new Error("Chrome 已有其他待审核的更新版本，停止旧工作流写入");
+    if (submitted?.state === "PENDING_REVIEW" && submittedVersions[0] === version)
+      return { state: "PENDING_REVIEW", alreadySubmitted: true, version };
+    if (submitted?.state === "PUBLISHED" && submittedVersions[0] === version)
+      return { state: "PUBLISHED", alreadySubmitted: true, version };
+    if (published?.state === "PUBLISHED" && publishedVersions.includes(version))
+      return { state: "PUBLISHED", alreadySubmitted: true, version };
+  };
+  let before = await getStatus();
+  const existing = checkStatus(before);
+  if (existing) return existing;
+  let cancelledVersion;
+  if (before.submittedItemRevisionStatus?.state === "STAGED")
+    throw new Error("Chrome 已有其他待审核/待发布版本；已通过审核的版本须手动处理");
+  if (before.submittedItemRevisionStatus?.state === "PENDING_REVIEW") {
+    if (!replacePendingReview)
+      throw new Error("Chrome 已有其他待审核/待发布版本，请先处理后台状态");
+    const oldVersion = versionsOf(before.submittedItemRevisionStatus)[0];
+    // 取消接口没有版本条件参数。临写前再读一次；串行锁之外请勿同时人工送审。
+    before = await getStatus();
+    const changed = checkStatus(before);
+    if (changed) return changed;
+    if (
+      before.submittedItemRevisionStatus?.state !== "PENDING_REVIEW" ||
+      versionsOf(before.submittedItemRevisionStatus)[0] !== oldVersion
+    )
+      throw new Error("Chrome 审核状态已变化，未取消或上传，请重新核对后台");
+    await jsonRequest(
+      fetchImpl,
+      `${url}:cancelSubmission`,
+      { method: "POST", headers },
+      "Chrome 取消旧审核",
+      true,
+    );
+    let cancelled = false;
+    for (let attempt = 0; attempt < maxPolls; attempt++) {
+      const status = await getStatus();
+      const already = checkStatus(status);
+      if (already) return already;
+      const active = status.submittedItemRevisionStatus;
+      if (!active || ["CANCELLED", "REJECTED"].includes(active.state)) {
+        cancelled = true;
+        break;
+      }
+      if (active.state !== "PENDING_REVIEW" || versionsOf(active)[0] !== oldVersion)
+        throw new Error("Chrome 取消期间审核状态已变化，停止上传");
+      if (attempt + 1 < maxPolls) await sleep(5000);
+    }
+    if (!cancelled) throw new Error("Chrome 旧审核取消尚未确认，未上传新包；请检查后台");
+    cancelledVersion = oldVersion;
   }
-  if (["PENDING_REVIEW", "STAGED"].includes(before.submittedItemRevisionStatus?.state))
-    throw new Error("Chrome 已有其他待审核/待发布版本，请先处理后台状态");
   const upload = identity(
     await jsonRequest(
       fetchImpl,
@@ -169,6 +248,12 @@ export async function publishChrome({
   }
   if (uploadState !== "SUCCEEDED")
     throw new Error("Chrome 上传未确认成功，未提交审核；请检查后台");
+  // 上传可能耗时数分钟，送审前再核对活动版本，不能覆盖同时发生的人工提交。
+  const ready = await getStatus();
+  const submitted = checkStatus(ready);
+  if (submitted) return submitted;
+  if (["PENDING_REVIEW", "STAGED"].includes(ready.submittedItemRevisionStatus?.state))
+    throw new Error("Chrome 上传期间出现其他活动提交，停止送审，请核对后台");
   const result = identity(
     await jsonRequest(
       fetchImpl,
@@ -183,7 +268,12 @@ export async function publishChrome({
   );
   if (!["PENDING_REVIEW", "PUBLISHED"].includes(result.state))
     throw new Error("Chrome 未返回待审核或已发布状态，请检查后台；未重复提交");
-  return { state: result.state, alreadySubmitted: false, version };
+  return {
+    state: result.state,
+    alreadySubmitted: false,
+    version,
+    ...(cancelledVersion ? { cancelledVersion } : {}),
+  };
 }
 
 export async function publishEdge(options) {
@@ -260,12 +350,16 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       expectedSha256: item.sha256,
       version: evidence.version,
     };
+    const replace = process.env.CHROME_REPLACE_PENDING_REVIEW ?? "0";
+    if (store === "chrome" && !["0", "1"].includes(replace))
+      throw new Error("CHROME_REPLACE_PENDING_REVIEW 仅支持 0 或 1");
     const result =
       store === "chrome"
         ? await publishChrome({
             ...common,
             publisherId: process.env.CHROME_PUBLISHER_ID,
             extensionId: process.env.CHROME_EXTENSION_ID,
+            replacePendingReview: replace === "1",
             accessToken: await chromeAccessToken(process.env.CHROME_SERVICE_ACCOUNT_JSON),
           })
         : await publishEdge({
@@ -278,7 +372,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
               "utf8",
             ),
           });
-    const summary = `${store} ${evidence.version}: ${result.state}${result.alreadySubmitted ? "（该版本已送审/发布，没有重复上传）" : ""}；最终上架仍由商店审核决定。\n`;
+    const summary = `${store} ${evidence.version}: ${result.state}${result.alreadySubmitted ? "（该版本已送审/发布，没有重复上传）" : ""}${result.cancelledVersion ? `（已取消旧版本 ${result.cancelledVersion} 的审核）` : ""}；最终上架仍由商店审核决定。\n`;
     console.log(summary.trim());
     if (process.env.GITHUB_STEP_SUMMARY)
       await (

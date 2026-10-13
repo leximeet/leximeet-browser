@@ -10,6 +10,10 @@ import {
   publishEdge,
 } from "../scripts/publish-stores.mjs";
 import { verifyConnectedRelease } from "../scripts/verify-connected-release.mjs";
+import {
+  compareVersions,
+  verifyLatestStoreRelease,
+} from "../scripts/verify-latest-store-release.mjs";
 
 const productId = "11111111-2222-3333-4444-555555555555";
 const extensionId = "a".repeat(32);
@@ -115,6 +119,7 @@ test("Chrome V2 先确认上传成功，再按正常审核和通过即发布方�
     chromeResult(),
     chromeResult({ uploadState: "IN_PROGRESS" }),
     chromeResult({ lastAsyncUploadState: "SUCCEEDED" }),
+    chromeResult(),
     chromeResult({ state: "PENDING_REVIEW" }),
   ]);
   assert.deepEqual(await publishChrome(s.options), {
@@ -128,10 +133,11 @@ test("Chrome V2 先确认上传成功，再按正常审核和通过即发布方�
       ["GET", `https://chromewebstore.googleapis.com/v2/${name}:fetchStatus`],
       ["POST", `https://chromewebstore.googleapis.com/upload/v2/${name}:upload`],
       ["GET", `https://chromewebstore.googleapis.com/v2/${name}:fetchStatus`],
+      ["GET", `https://chromewebstore.googleapis.com/v2/${name}:fetchStatus`],
       ["POST", `https://chromewebstore.googleapis.com/v2/${name}:publish`],
     ],
   );
-  assert.deepEqual(JSON.parse(String(s.calls[3]!.options.body)), {
+  assert.deepEqual(JSON.parse(String(s.calls[4]!.options.body)), {
     publishType: "DEFAULT_PUBLISH",
     skipReview: false,
   });
@@ -153,6 +159,7 @@ test("Chrome 拒绝错 SHA、非法身份、换行凭据或错误预算，零网
     { version: "v1.0.1" },
     { accessToken: "bad\nsecret" },
     { maxPolls: 0 },
+    { replacePendingReview: "true" as unknown as boolean },
   ]) {
     const s = fixture(t, []);
     await assert.rejects(publishChrome({ ...s.options, ...change }));
@@ -161,8 +168,11 @@ test("Chrome 拒绝错 SHA、非法身份、换行凭据或错误预算，零网
 });
 
 test("Chrome 同版本已送审/发布不重复写；其他版本在审核时停止", async (t) => {
-  for (const state of ["PENDING_REVIEW", "PUBLISHED"]) {
-    const revision = { state, distributionChannels: [{ crxVersion: "1.0.1" }] };
+  for (const state of ["PENDING_REVIEW", "PUBLISHED", "SUBMITTED_PUBLISHED"]) {
+    const revision = {
+      state: state === "SUBMITTED_PUBLISHED" ? "PUBLISHED" : state,
+      distributionChannels: [{ crxVersion: "1.0.1" }],
+    };
     const s = fixture(t, [
       chromeResult({
         [state === "PUBLISHED"
@@ -330,6 +340,7 @@ test("商店没有确认成功时拒绝假完成，不自动重试提交", async
     const chrome = fixture(t, [
       chromeResult(),
       chromeResult({ uploadState: "SUCCEEDED" }),
+      chromeResult(),
       chromeResult({ state }),
     ]);
     await assert.rejects(publishChrome(chrome.options), /未返回待审核/);
@@ -411,4 +422,190 @@ test("Edge 已有上传操作失败或一直处理时不重传也不送审", asy
     );
     assert.equal(s.calls.filter((call) => call.options.method === "POST").length, 0);
   }
+});
+
+const pendingChrome = (version: string, state = "PENDING_REVIEW") =>
+  chromeResult({
+    submittedItemRevisionStatus: {
+      state,
+      distributionChannels: [{ crxVersion: version }],
+    },
+  });
+
+test("Chrome 仅在显式开启后取消旧审核，接受空成功响应并等状态生效再上传", async (t) => {
+  for (const status of [200, 204]) {
+    const s = fixture(t, [
+      pendingChrome("1.0.0"),
+      pendingChrome("1.0.0"),
+      new Response(null, { status }),
+      pendingChrome("1.0.0"),
+      chromeResult(),
+      chromeResult({ uploadState: "SUCCEEDED", crxVersion: "1.0.1" }),
+      chromeResult(),
+      chromeResult({ state: "PENDING_REVIEW" }),
+    ]);
+    assert.deepEqual(await publishChrome({ ...s.options, replacePendingReview: true }), {
+      state: "PENDING_REVIEW",
+      alreadySubmitted: false,
+      version: "1.0.1",
+      cancelledVersion: "1.0.0",
+    });
+    assert.deepEqual(
+      s.calls.map(({ url, options }) => [options.method, url.split(":").at(-1)]),
+      [
+        ["GET", "fetchStatus"],
+        ["GET", "fetchStatus"],
+        ["POST", "cancelSubmission"],
+        ["GET", "fetchStatus"],
+        ["GET", "fetchStatus"],
+        ["POST", "upload"],
+        ["GET", "fetchStatus"],
+        ["POST", "publish"],
+      ],
+    );
+    assert.equal(s.calls[2]!.options.body, undefined);
+    assert.deepEqual(s.waits, [5000]);
+  }
+});
+
+test("Chrome 自动替换不撤回同版本、更新版本、待发布版本或无法识别的版本", async (t) => {
+  const same = fixture(t, [pendingChrome("1.0.1")]);
+  assert.equal(
+    (await publishChrome({ ...same.options, replacePendingReview: true }))
+      .alreadySubmitted,
+    true,
+  );
+  assert.equal(same.calls.length, 1);
+  for (const reply of [
+    pendingChrome("1.0.2"),
+    pendingChrome("1.0.0", "STAGED"),
+    chromeResult({
+      publishedItemRevisionStatus: {
+        state: "UNKNOWN",
+        distributionChannels: [{ crxVersion: "1.0.0" }],
+      },
+    }),
+    chromeResult({
+      submittedItemRevisionStatus: { state: "PENDING_REVIEW", distributionChannels: [] },
+    }),
+    chromeResult({
+      submittedItemRevisionStatus: {
+        state: "PENDING_REVIEW",
+        distributionChannels: [{ crxVersion: "unknown" }],
+      },
+    }),
+    chromeResult({
+      submittedItemRevisionStatus: {
+        state: "PENDING_REVIEW",
+        distributionChannels: [{ crxVersion: "1.0.0" }, { crxVersion: "1.0.1" }],
+      },
+    }),
+    chromeResult({ submittedItemRevisionStatus: { state: "UNKNOWN" } }),
+    chromeResult({
+      publishedItemRevisionStatus: {
+        state: "PUBLISHED",
+        distributionChannels: [{ crxVersion: "1.0.2" }],
+      },
+    }),
+  ]) {
+    const s = fixture(t, [reply]);
+    await assert.rejects(publishChrome({ ...s.options, replacePendingReview: true }));
+    assert.equal(s.calls.length, 1);
+    assert.equal(
+      s.calls.some(({ options }) => options.method === "POST"),
+      false,
+    );
+  }
+});
+
+test("Chrome 临取消前遇到审核变化或错误身份时零写入", async (t) => {
+  for (const changed of [
+    pendingChrome("1.0.2"),
+    pendingChrome("1.0.0", "STAGED"),
+    chromeResult(),
+    Response.json({ name: "wrong", itemId: extensionId }),
+  ]) {
+    const s = fixture(t, [pendingChrome("1.0.0"), changed]);
+    await assert.rejects(publishChrome({ ...s.options, replacePendingReview: true }));
+    assert.equal(s.calls.length, 2);
+    assert.equal(
+      s.calls.some(({ options }) => options.method === "POST"),
+      false,
+    );
+  }
+});
+
+test("Chrome 取消失败、失联或取消状态未确认时不上传、不重试取消、不暴露凭据", async (t) => {
+  for (const reply of [
+    new Error("private-test-token"),
+    new Response("private-test-token", { status: 400 }),
+    new Response(null, { status: 202 }),
+    new Response("private-test-token", { status: 429 }),
+  ]) {
+    const s = fixture(t, [pendingChrome("1.0.0"), pendingChrome("1.0.0"), reply]);
+    await assert.rejects(
+      publishChrome({ ...s.options, replacePendingReview: true }),
+      (error: Error) => !error.message.includes("private-test-token"),
+    );
+    assert.equal(s.calls.length, 3);
+    assert.equal(s.calls.filter(({ options }) => options.method === "POST").length, 1);
+  }
+  for (const states of [
+    [pendingChrome("1.0.0"), pendingChrome("1.0.0")],
+    [pendingChrome("1.0.2")],
+    [pendingChrome("1.0.0", "STAGED")],
+  ]) {
+    const s = fixture(t, [
+      pendingChrome("1.0.0"),
+      pendingChrome("1.0.0"),
+      new Response(null, { status: 204 }),
+      ...states,
+    ]);
+    await assert.rejects(
+      publishChrome({ ...s.options, replacePendingReview: true, maxPolls: 2 }),
+    );
+    assert.equal(s.calls.filter(({ options }) => options.method === "POST").length, 1);
+  }
+});
+
+test("Chrome 上传后出现新的活动提交就停止送审，不再次取消", async (t) => {
+  for (const ready of [pendingChrome("1.0.2"), pendingChrome("1.0.0")]) {
+    const s = fixture(t, [
+      chromeResult(),
+      chromeResult({ uploadState: "SUCCEEDED" }),
+      ready,
+    ]);
+    await assert.rejects(publishChrome({ ...s.options, replacePendingReview: true }));
+    assert.equal(s.calls.filter(({ options }) => options.method === "POST").length, 1);
+    assert.equal(
+      s.calls.some(
+        ({ url }) => url.endsWith(":publish") || url.endsWith(":cancelSubmission"),
+      ),
+      false,
+    );
+  }
+});
+
+test("最新正式发行门禁跨分页按数字版本比较，不按时间或 Latest 标记倒退", () => {
+  const release = (tag_name: string, extra = {}) => ({
+    tag_name,
+    draft: false,
+    prerelease: false,
+    published_at: "2026-10-13T00:00:00Z",
+    ...extra,
+  });
+  assert.equal(compareVersions("1.0.10", "1.0.9"), 1);
+  assert.equal(compareVersions("1.9007199254740993.0", "1.9007199254740992.0"), 1);
+  assert.equal(compareVersions("1.0.1", "1.0.1"), 0);
+  const pages = [
+    [release("1.0.9"), release("2.0.0", { draft: true })],
+    [release("1.0.10"), release("3.0.0", { prerelease: true })],
+  ];
+  assert.equal(verifyLatestStoreRelease(pages, "1.0.10"), "1.0.10");
+  assert.throws(() => verifyLatestStoreRelease(pages, "1.0.9"), /更新的正式/);
+  assert.throws(() => verifyLatestStoreRelease(pages, "1.0.11"), /尚未正式发行/);
+  for (const input of [null, [], {}, [{}], [[{ tag_name: "1.0.10" }]]])
+    assert.throws(() => verifyLatestStoreRelease(input, "1.0.10"));
+  for (const version of ["v1.0.10", "1.00.10", "1.0.10-rc.1"])
+    assert.throws(() => verifyLatestStoreRelease(pages, version));
 });

@@ -18,8 +18,14 @@ export function publishChrome(
     publisherId: string;
     extensionId: string;
     accessToken: string;
+    replacePendingReview?: boolean;
   },
-): Promise<{ state: string; alreadySubmitted: boolean; version: string }>;
+): Promise<{
+  state: string;
+  alreadySubmitted: boolean;
+  version: string;
+  cancelledVersion?: string;
+}>;
 export function publishEdge(
   options: PackageOptions & {
     productId: string;

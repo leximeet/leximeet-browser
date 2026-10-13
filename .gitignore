@@ -29,3 +29,6 @@ coverage/
 *.pfx
 *.keystore
 .intraview/
+
+# 本机问题截图与复现记录，不发布也不参与源码格式化。
+/.bug/
